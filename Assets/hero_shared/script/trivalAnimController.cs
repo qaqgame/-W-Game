@@ -5,10 +5,10 @@ using UnityEngine;
 public class trivalAnimController : MonoBehaviour
 {
     private readonly string PrePath = "Prefabs/AnimationClips/";
-    private readonly string[] ActionList = {"dance_1","dance_2","dance_3","run","walk","dead"};
+    private readonly string[] ActionList = {"idle","dance_1","dance_2","dance_3","run","walk","dead"};
     private Animator animator;
     private AnimatorOverrideController controller;
-    public AnimationClip dance_1,dance_2,dance_3,run,walk,dead;
+    public AnimationClip idle,dance_1,dance_2,dance_3,run,walk,dead;
     public Dictionary<string,AnimationClip> animations;
     // Start is called before the first frame update
     void Start()
@@ -20,12 +20,13 @@ public class trivalAnimController : MonoBehaviour
         controller.runtimeAnimatorController=animator.runtimeAnimatorController;
         foreach (var actionName in ActionList)
         {
-            if(animations.ContainsKey(actionName)){
-                controller[actionName]=animations[actionName];
+            AnimationClip temp;
+            if(animations.TryGetValue(actionName,out temp)&&temp!=null){
             }
             else{
-                controller[actionName]=Resources.Load(PrePath+objName+"@"+actionName) as AnimationClip;
+                temp=Resources.Load(PrePath+objName+"@"+actionName) as AnimationClip;
             }
+            controller[actionName]=temp;
         }
         animator.runtimeAnimatorController=null;
         animator.runtimeAnimatorController=controller;
@@ -34,6 +35,7 @@ public class trivalAnimController : MonoBehaviour
 
     private void init(){
         animations=new Dictionary<string, AnimationClip>();
+        animations.Add("idle",idle);
         animations.Add("dance_1",dance_1);
         animations.Add("dance_2",dance_2);
         animations.Add("dancce_3",dance_3);
