@@ -38,7 +38,7 @@ public class trivalAnimController : MonoBehaviour
         animations.Add("idle",idle);
         animations.Add("dance_1",dance_1);
         animations.Add("dance_2",dance_2);
-        animations.Add("dancce_3",dance_3);
+        animations.Add("dance_3",dance_3);
         animations.Add("run",run);
         animations.Add("walk",walk);
         animations.Add("dead",dead);
