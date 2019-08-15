@@ -8,6 +8,7 @@ namespace NetModels
         public string desc;
         public string target;
         public string position;
+        public int framenum;
     }
     public class Hash{
         public string player1Hash;

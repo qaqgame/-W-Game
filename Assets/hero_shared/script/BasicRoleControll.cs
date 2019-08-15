@@ -31,15 +31,9 @@ public class BasicRoleControll : MonoBehaviour
         	{
 				if (hit.collider.gameObject.tag == "Plane")//当射线碰撞到的是Plane（此if语句限制鼠标点击位置在Plane上有效）
             	{
-            		endPosition = hit.point;//鼠标点击位置赋给endPosition
-                    endPosition.y = transform.position.y;//保持移动中的高度（y）不变
-                    transform.LookAt(endPosition);//看向鼠标点击的方向
-                    animator.SetInteger("state",1);
-                    animator.SetFloat("moveSpeed",speed);
-                    #region for debug
-                    Debug.Log("target position:"+endPosition);
-                    #endregion
-                    
+                    Vector3 targetPosition=hit.point;
+                    targetPosition.y=transform.position.y;
+            		LockStepController.Instance.SendAction(new Move(this.transform.name,0,targetPosition));          
             	}
 			}   
         }
@@ -64,6 +58,13 @@ public class BasicRoleControll : MonoBehaviour
         #region for debug
             Debug.DrawLine(transform.position,endPosition,Color.green);
         #endregion
+    }
+
+    public void Move(Vector3 position){
+        endPosition=position;
+        transform.LookAt(endPosition);//看向鼠标点击的方向
+        animator.SetInteger("state",1);
+        animator.SetFloat("moveSpeed",speed);     
     }
 
     void FixedUpdate() {  
