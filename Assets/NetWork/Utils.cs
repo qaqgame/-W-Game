@@ -40,23 +40,32 @@ namespace NetUtils
         
         // 创建参数列表 每个参数要求超过5字符！！（用于分解接收的原始 string）
         public static string[] getParameter(){
-            string para_1 = "{\"result\"";
+            string para_1 = "{\"datatype\":1";
+            string para_3 = "{\"datatype\":4";
             string para_2 = "all player connected";
             // string para_2 = "";
-            string[] paraList = new string[2];
+            string[] paraList = new string[3];
             paraList[0] = para_1;
             paraList[1] = para_2;
+            paraList[2] = para_3;
             return paraList;
         }
 
         private static int IndexHelp(string getstr, string[] para, int from = 0){
             int num = 1;
             int min = getstr.IndexOf(para[0], from);
+            Debug.Log("IndexHelp 第一次的min值"+min);
+
             while(num < para.Length){
                 int temp = getstr.IndexOf(para[num], from);
-                if(temp < min) min = temp;
+                if(min == -1){
+                    min = temp;
+                }else if(temp != -1 && temp < min){
+                    min = temp;
+                }
                 num++;
             }
+            Debug.Log("IndexHelp 返回的min值"+min);
             return min;
         }
         
@@ -75,18 +84,26 @@ namespace NetUtils
 
             while(end != -1){
                 start = IndexHelp(getstr, para);
-                if(start == -1) break;
+                if(start == -1) {
+                    Debug.Log("是break出去的！！！");
+                    break;
+
+                }
                 end = IndexHelp(getstr, para, start+5);
                 if(end != -1){
                     string substr = getstr.Substring(start, end - start);
                     getstr = getstr.Remove(start, end - start);
                     Debug.Log("分解后加入waitList的数据"+substr);
-                    waitList.Enqueue(substr);
+                    lock(waitList){
+                        waitList.Enqueue(substr);
+                    }                    
                 }else if(end == -1){
                     string substr = getstr.Substring(start);
                     getstr = getstr.Remove(start);
                     Debug.Log("分解后加入waitList的数据"+substr);
-                    waitList.Enqueue(substr);
+                    lock(waitList){
+                        waitList.Enqueue(substr);
+                    }                    
                 }
             }
             return getstr;
@@ -96,30 +113,30 @@ namespace NetUtils
     public class Json{
         // 从单句 string 解析 [json] 为 GamingInfo 
         public static object StringtoObj(string str){
-            object obj = JsonConvert.DeserializeObject<object>(str);
+            GamingInfo obj = JsonConvert.DeserializeObject<GamingInfo>(str);
             return obj;
         }
         // 从 GamingInfo 生成 [json] 
-        public static string ObjtoString(object obj){
+        public static string ObjtoString(GamingInfo obj){
             string str = JsonConvert.SerializeObject(obj);
             return str;
         }  
     }
 
-    public class Tests{
-        // 组装待发送的游戏数据  测试用
-        public static object assembly(){
-            Opinion Opinion_1 = new Opinion(){type  = "move", desc = "130*144", target = "none", position = "0*0"};
-            var OpinionList = new List<Opinion>();
-            OpinionList.Add(Opinion_1);
-            Hash hash_1 = new Hash(){
-                player1Hash = "dfasofoh12441414",
-                player2Hash = "dfasofoh12441414",
-                player3Hash = "dfasofoh12441414",
-                player4Hash = "dfasofoh12441414",
-                player5Hash = "dfasofoh12441414"};
-            GamingInfo info = new GamingInfo(){ UserID = "holdonbush", Opinions = OpinionList, hash = hash_1 };
-            return info;
-        }
-    }
+    // public class Tests{
+    //     // 组装待发送的游戏数据  测试用
+    //     public static object assembly(){
+    //         Opinion Opinion_1 = new Opinion(){type  = "move", desc = "130*144", target = "none", position = "0*0"};
+    //         var OpinionList = new List<Opinion>();
+    //         OpinionList.Add(Opinion_1);
+    //         Hash hash_1 = new Hash(){
+    //             player1Hash = "dfasofoh12441414",
+    //             player2Hash = "dfasofoh12441414",
+    //             player3Hash = "dfasofoh12441414",
+    //             player4Hash = "dfasofoh12441414",
+    //             player5Hash = "dfasofoh12441414"};
+    //         GamingInfo info = new GamingInfo(){ UserID = "holdonbush", Opinions = OpinionList, hash = hash_1 };
+    //         return info;
+    //     }
+    // }
 }

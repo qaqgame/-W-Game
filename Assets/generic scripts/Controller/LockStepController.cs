@@ -21,11 +21,12 @@ public class LockStepController : MonoBehaviour
     Client client;
 
     bool initialized = false;
+	bool running=false;
 
     // Start is called before the first frame update
     void Awake()
     {
-        enabled=false;
+        running=false;
         Instance=this;
         Init();
     }
@@ -33,6 +34,7 @@ public class LockStepController : MonoBehaviour
     #region GameStart
     public void InitGame(){
         if(initialized){return;}
+		client=GetComponent<Client>();
         initialized=true;
     }
 
@@ -45,7 +47,7 @@ public class LockStepController : MonoBehaviour
     }
 
     public void StartGame(){
-        enabled=true;
+        running=true;
     }
     #endregion
 
@@ -56,15 +58,15 @@ public class LockStepController : MonoBehaviour
 			Debug.Log("Game has not started, action will be ignored.");
 			return;
 		}
-        //client.addAction(action);
-		Opinion opinion=action.toOpinion();
-		Opinion[] os=new Opinion[]{opinion};
-		RecieveActions(LockStepTurnID+1,"player1",os);
+        client.AddGamingInfo(action.toOpinion());
+		// Opinion opinion=action.toOpinion();
+		// Opinion[] os=new Opinion[]{opinion};
+		// RecieveActions(LockStepTurnID+1,"player1",os);
     }
 
     private bool LockStepTurn() {
 		//Debug.Log("LockStepTurnID: " + LockStepTurnID);
-		if(LockStepTurnID >= FirstLockStepTurnID + 3&&LockStepTurnID>pendingActions.currentTurn) {
+		if(LockStepTurnID >= FirstLockStepTurnID + 1&&LockStepTurnID>pendingActions.currentTurn) {
 			ProcessActions (gameFramesPerLocksetpTurn);
 		}
 		return NextTurn();
@@ -84,7 +86,7 @@ public class LockStepController : MonoBehaviour
     //确认回合
     public void ConfirmTurn(int turn){
 		if(turn<=LockStepTurnID||turn>LockStepTurnID+3){
-			Debug.LogError("can't confirm turn:"+turn);
+			Debug.LogError("can't confirm turn:"+turn+",current turn:"+LockStepTurnID);
 			return;
 		}
 		confirmActions.Confirm(turn-LockStepTurnID-1);
@@ -115,6 +117,9 @@ public class LockStepController : MonoBehaviour
 	
 	//called once per unity frame
 	public void Update() {
+		if(!running){
+			return;
+		}
 		//Basically same logic as FixedUpdate, but we can scale it by adjusting FrameLength
 		accumilatedTime = accumilatedTime + Time.deltaTime;
 		

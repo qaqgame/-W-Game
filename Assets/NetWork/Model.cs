@@ -18,9 +18,36 @@ namespace NetModels
         public string player5Hash;
     }
     public class GamingInfo{
+        public int datatype;
         public string UserID;
-        public List<Opinion> Opinions;
+        public int Roundnum;
+        public Queue<Opinion> Opinions;
         public Hash hash;
+    }
+
+    public class ResGamingInfo{
+        public string UserID;
+        public Queue<Opinion> Opinions;
+    }
+
+    public class ResTitle{
+        public int datatype;
+        public string result;
+        public int Roundnum;
+    }
+
+    public class Response{
+        public int datatype;
+        public string result;
+        public int Roundnum;
+        public Queue<ResGamingInfo> content; 
+    }
+
+    public class SendTitle{
+        
+        public int datatype;
+        public string UserID;
+        public int Roundnum;
     }
 
 }
