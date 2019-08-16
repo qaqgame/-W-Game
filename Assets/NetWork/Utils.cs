@@ -100,7 +100,7 @@ namespace NetUtils
                 }else if(end == -1){
                     string substr = getstr.Substring(start);
                     getstr = getstr.Remove(start);
-                    Debug.Log("分解后加入waitList的数据"+substr);
+                    // Debug.Log("分解后加入waitList的数据"+substr);
                     lock(waitList){
                         waitList.Enqueue(substr);
                     }                    

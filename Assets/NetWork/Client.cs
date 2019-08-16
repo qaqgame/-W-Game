@@ -33,7 +33,7 @@ public class Client : MonoBehaviour
 
     // 计时器
     private System.Threading.Timer timer_heartbeats; //1000ms = 1s;
-    // private System.Threading.Timer timer_gaming;
+    private System.Threading.Timer timer_gaming;
 
     // NetworkStream ns;
     // StreamWriter sw;
@@ -50,6 +50,12 @@ public class Client : MonoBehaviour
     private static object lockerRecv = new object();
     private static object lockerSend = new object();
 
+
+    private int countType1 = 0;
+    private int countType2 = 0;
+    private int countAll = 0;
+
+
     // 定义一个委托 标志为 connectCallback，下面的Connect函数中最后两个参数,c为小写的函数没有使用，如果需要外部传入参数再改
     public delegate void connectCallback();
 
@@ -58,6 +64,8 @@ public class Client : MonoBehaviour
         try{
             
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            socket.SendBufferSize = 10240;
+            socket.NoDelay = true;
             // 这里是异步链接，但目前没有作用
 
             IAsyncResult result = socket.BeginConnect(this.serverIp, this.serverPort, new AsyncCallback(this.ConnectCallback), socket);
@@ -132,6 +140,7 @@ public class Client : MonoBehaviour
                 if(recv == null){
                     Debug.Log("从socket里边拿出来就是空的");
                 }
+                //Debug.Log("接收消息时间"+DateTime.Now.TimeOfDay.ToString());
                 // 存储
                 lock (lockerRecv){                    
                     recvList.Enqueue(recv);
@@ -190,11 +199,13 @@ public class Client : MonoBehaviour
                     
                     if(getstr == "all player connected"){
                         this.timer_heartbeats.Change(-1,0);
+                        this.timer_gaming = new System.Threading.Timer(SendInfo, null, 0, 20);
                         this.isGaming = true;
                         // tcy 在下面update加的标识，不知道有啥用。。
                         running=true;                        
                         LockStepController.Instance.StartGame();
                         Debug.Log("接收到 all player connected，开始游戏 ^_^!");
+                        Debug.Log("all player时间："+DateTime.Now.TimeOfDay.ToString());
                     }
                     else{
                         JObject res = JObject.Parse(getstr);
@@ -212,7 +223,7 @@ public class Client : MonoBehaviour
                                                       
                             
                         }else if(title.datatype == 4){
-                            Debug.Log("调用 ConfirmTrun 接口");
+                            Debug.Log("调用 ConfirmTrun 接口，传入回合："+title.Roundnum);
                             LockStepController.Instance.ConfirmTurn(title.Roundnum);
 
                         }else{
@@ -238,6 +249,9 @@ public class Client : MonoBehaviour
 
     // 留出的接口 用于接收等待发送的游戏操作
     public void AddGamingInfo(Opinion op){
+        if(this.GameTurn - LockStepController.Instance.LockStepTurnID > 3){
+            return;
+        }
         lock(lockerChange){
             if(useSend){
                 lock(sendList_1){
@@ -250,8 +264,7 @@ public class Client : MonoBehaviour
                     sendList_2.Enqueue(op);
                 }
             }
-        }
-        
+        }       
         
     }
     
@@ -280,7 +293,7 @@ public class Client : MonoBehaviour
 
 
     private float AccumilatedTime = 0f;
-    private float FrameLength = 0.05f;
+    private float FrameLength = 0.05f; // 原来是0.05f
     private float TurnLength = 0.2f;
     private int GameFrame = 0;
     private int GameFramesPerLocksetpTurn = 4;
@@ -302,14 +315,19 @@ public class Client : MonoBehaviour
                 timer_heartbeats.Change(-1,0);
                 Debug.Log("执行完终止计时器！！！！!!!!!!!!!!!!!");
             }
-
+            if(timer_gaming != null){
+                timer_gaming.Change(-1,0);
+            }
+            this.socket.Close();
             this.threadstop = true;
             running=false;
+            Debug.Log("已发送数量"+this.countAll+"type1 发送数量"+this.countType1+"ack发送数量"+this.countType2);
         }
         if(running){
-            Debug.Log("is running");
+            // Debug.Log("is running");
             if(this.isGaming){
-                Debug.Log("is Gaming");
+                //Debug.Log("回合开始时间："+DateTime.Now.TimeOfDay.ToString());
+                // Debug.Log("is Gaming");
                 this.AccumilatedTime = this.AccumilatedTime + Time.deltaTime; // deltatime 是每一帧的时间,即每此update间隔的时间
 
                 while(this.AccumilatedTime > this.FrameLength){
@@ -324,34 +342,39 @@ public class Client : MonoBehaviour
     }
 
     private void GameFrameTurn(){
-        Debug.Log("GameFrame:"+this.GameFrame);
-        this.GameFrame++;
+        // Debug.Log("GameFrame:"+this.GameFrame);
         if(this.GameFrame == this.GameFramesPerLocksetpTurn) {
-            this.GameFrame = 0;
-            this.GameTurn++;
-            Debug.Log("GameTurn"+this.GameTurn);
-            lock(lockerChange){
-                useSend = false;
-            }
-            if(useSend){
-                lock(sendList_2){
-                    SendInfo(ref sendList_2);
-                    sendList_2.Clear();
-                }
-            }
-            else{
-                lock(sendList_1){
-                    SendInfo(ref sendList_1);
-                    sendList_1.Clear();
-                }
-            }
+            return;            
         }
-
-
+        this.GameFrame++;
     }
 
-    private void SendInfo(ref Queue<Opinion> sendList){
-        Debug.Log("Sending GamingInfo");
+    private void SendInfo(System.Object state){
+        lock(lockerChange){
+            useSend = !useSend;
+        }
+        if(useSend){
+            lock(sendList_2){
+                Send(ref sendList_2);
+                sendList_2.Clear();
+            }
+        }
+        else{
+            lock(sendList_1){
+                Send(ref sendList_1);
+                sendList_1.Clear();
+            }
+        }
+        
+        if(this.GameTurn - LockStepController.Instance.LockStepTurnID <= 3){            
+            this.GameTurn++;
+            this.GameFrame = 0;
+        }
+        
+    }
+    private void Send(ref Queue<Opinion> sendList){
+        this.countType1++;
+        //Debug.Log("Sending GamingInfo"+this.countType1);
         GamingInfo info = new GamingInfo();
         info.Roundnum = this.GameTurn;
         info.UserID = "holdonbush";
@@ -364,21 +387,37 @@ public class Client : MonoBehaviour
                 player4Hash = "dfasofoh12441414",
                 player5Hash = "dfasofoh12441414"};
         info.hash = hash_1;
+        //string start = DateTime.Now.TimeOfDay.ToString();
         string str = JsonConvert.SerializeObject(info);
+        //string end = DateTime.Now.TimeOfDay.ToString();
+        //Debug.Log("序列化开始时间"+start);
+        //Debug.Log("序列化结束时间"+end);
         Debug.Log("Send str:"+str);
         byte[] buffer = SocketSend.StringtoByte(str);
         Debug.Log("byte[]:"+buffer);
-        this.socket.Send(buffer);
+        // this.socket.Send(buffer);
+        string testsocket = "{\"datatype\":2,\"UserID\":\"holdonbush\",\"Roundnum\":12,\"Opinions\":[{\"type\":\"move\",\"desc\":\"130*144\",\"target\":\"none\",\"position\":\"0*0\",\"framenum\":4},{\"type\":\"skill\",\"desc\":\"123\",\"target\":\"144*144\",\"position\":\"100*70\",\"framenum\":5}],\"hash\":{\"player1Hash\":\"dfasofoh12441414\",\"player2Hash\":\"safdjojasfojofjs\",\"player3Hash\":\"fdsafoowjfojaofs\",\"player4Hash\":\"jfoasjoejfoajofj\",\"player5Hash\":\"ojojaodsjfiiofaj\"}}";
+        byte[] testbyte = SocketSend.StringtoByte(testsocket);
+        this.socket.BeginSend(buffer, 0, buffer.Length, 0,new AsyncCallback(SendCallback), this.socket);
+    }
+
+    private void SendCallback(IAsyncResult ar){        
+        this.countAll++;
+        // ar.AsysncState 是拿到BeginConnect最后一个参数，也就是socket
+        Socket socket = (Socket)ar.AsyncState;
+        int bytesSent = socket.EndSend(ar);
+        //Debug.Log("发送字节长度"+bytesSent+"发送次数："+this.countAll);
     }
 
     private void SendAck(int turnNum){
-        Debug.Log("Sending ack");
+        this.countType2++;
+        Debug.Log("Sending ack 回合数："+turnNum);
         AckTitle tit = new AckTitle();
         tit.Roundnum = turnNum;
         tit.UserID = "holdonbush";
         tit.datatype = 3;
         string str = JsonConvert.SerializeObject(tit);
         byte[] buffer = SocketSend.StringtoByte(str);
-        this.socket.Send(buffer);
+        this.socket.BeginSend(buffer, 0, buffer.Length, 0,new AsyncCallback(SendCallback), this.socket);
     }
 }

@@ -31,7 +31,7 @@ public class PendingActions
 		nextActionsCount = 0;
 		nextNextActionsCount = 0;
 		nextNextNextActionsCount = 0;
-		currentTurn=lsm.LockStepTurnID;
+		currentTurn=LockStepController.Instance.LockStepTurnID;
 	}
 	
 	public void NextTurn() {
