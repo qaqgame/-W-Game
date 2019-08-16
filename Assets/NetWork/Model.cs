@@ -17,6 +17,15 @@ namespace NetModels
         public string player4Hash;
         public string player5Hash;
     }
+    
+    
+    public class ResGamingInfo{
+        public string UserID;
+        public Queue<Opinion> Opinions;
+    }
+
+
+    // 发送数据
     public class GamingInfo{
         public int datatype;
         public string UserID;
@@ -25,17 +34,8 @@ namespace NetModels
         public Hash hash;
     }
 
-    public class ResGamingInfo{
-        public string UserID;
-        public Queue<Opinion> Opinions;
-    }
 
-    public class ResTitle{
-        public int datatype;
-        public string result;
-        public int Roundnum;
-    }
-
+    // 接收数据
     public class Response{
         public int datatype;
         public string result;
@@ -43,11 +43,20 @@ namespace NetModels
         public Queue<ResGamingInfo> content; 
     }
 
-    public class SendTitle{
+    // 发送确认
+    public class AckTitle{
         
         public int datatype;
         public string UserID;
         public int Roundnum;
     }
+
+    // 接收确认
+    public class ResTitle{
+        public int datatype;
+        public string result;
+        public int Roundnum;
+    }
+    
 
 }

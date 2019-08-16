@@ -17,35 +17,37 @@ using Newtonsoft.Json.Linq;
 
 public class Client : MonoBehaviour
 {
+    // socket 参数
     Socket socket;
-
     public string serverIp;
     public int serverPort;
 
+    // thread
     private Thread threadRecv;
     private Thread threadSeparation;
     private Thread threadParase;
-    // private Thread threadSend;
 
+    // 标志
     private bool threadstop = false;
     private bool isGaming = false;
 
+    // 计时器
     private System.Threading.Timer timer_heartbeats; //1000ms = 1s;
     // private System.Threading.Timer timer_gaming;
 
     // NetworkStream ns;
     // StreamWriter sw;
 
+    // 存储队列
     private static Queue<string> recvList = new Queue<string>();
     private static Queue<string> waitList = new Queue<string>();
     private static Queue<Opinion> sendList_1 = new Queue<Opinion>();
     private static Queue<Opinion> sendList_2 = new Queue<Opinion>();
     private static bool useSend = true;
 
+    // 锁
     private static object lockerChange = new object();
-
     private static object lockerRecv = new object();
-    //private static object locketWait = new object();
     private static object lockerSend = new object();
 
     // 定义一个委托 标志为 connectCallback，下面的Connect函数中最后两个参数,c为小写的函数没有使用，如果需要外部传入参数再改
@@ -60,22 +62,19 @@ public class Client : MonoBehaviour
 
             IAsyncResult result = socket.BeginConnect(this.serverIp, this.serverPort, new AsyncCallback(this.ConnectCallback), socket);
 
-
             DateTime beforeDT = System.DateTime.Now;
             bool success = result.AsyncWaitHandle.WaitOne(5000,true);
             DateTime afterDT = System.DateTime.Now;
             TimeSpan ts = afterDT.Subtract(beforeDT);
             
             Debug.Log("计时："+ts.TotalMilliseconds);
-
             Debug.Log("检查连接："+ socket.Connected);
             // 这步是判断是否超时而不判断连接结果
             if(!success){
                 socket.Close();
                 Debug.Log("Connected time out!!!");
-            }else{
-                timer_heartbeats = new System.Threading.Timer(SendHeartBeats, null, 0, 5);
             }
+                
             //this.ns = new NetworkStream(this.socket);
             //this.sw = new StreamWriter(ns);
             
@@ -92,28 +91,28 @@ public class Client : MonoBehaviour
         Socket socket = (Socket)ar.AsyncState;
         if(socket.Connected){
             Debug.Log("Connected success");
-            // 链接成功，启动接收信息线程
+
+            // 发送心跳包
+            timer_heartbeats = new System.Threading.Timer(SendHeartBeats, null, 0, 5);
+            
+            // 启动接收信息线程
             this.threadRecv = new Thread(new ThreadStart(ReceiveFromServer));
             this.threadRecv.IsBackground = true;
             this.threadRecv.Start();
 
+            // 启动分解信息线程
             this.threadSeparation = new Thread(new ThreadStart(Separation));
             this.threadSeparation.IsBackground = true;
             this.threadSeparation.Start();
 
+            // 启动解析信息线程
             this.threadParase = new Thread(new ThreadStart(Parase));
             this.threadParase.IsBackground = true;
             this.threadParase.Start();
-
-            // this.threadSend = new Thread(new ThreadStart(Send));
-            // this.threadSend.IsBackground = true;
-            // this.threadSend.Start();
             
         }
         else{
             Debug.Log("Connected fialed!!!");
-
-            //SendGameInfo();
 
             socket.EndConnect(ar);
         }
@@ -156,27 +155,22 @@ public class Client : MonoBehaviour
                 }
 
                 if(getstr != null){
-                        
-                    if(recvList.Count < 50){
-                        Debug.Log("recvList safe");
-                    }
-                    else{
-                        Debug.Log("recvList unsafe !!!");
-                    }
-                    Debug.Log("接受到的消息："+getstr);
-                    if(getstr != null){
-                        getstr = SocketRecv.split(getstr, ref waitList, SocketRecv.getParameter());
-                    }else{
-                        Debug.Log("哪里来的空数据？？？？？？？");
-                    }
-                    Debug.Log("一次解析完成");
-                    
-
+                    Debug.Log("recvList中取出："+getstr);
+                    getstr = SocketRecv.split(getstr, ref waitList, SocketRecv.getParameter());
                     Debug.Log("分解后剩余的数据（未加入waitList）" + getstr);
+                }else{
+                    Debug.Log("recvList中存在空数据 或 从空recvList中取数据");
+                }
+
+                // 检查recvList
+                if(recvList.Count < 50){
+                    Debug.Log("recvList safe");
+                }
+                else{
+                    Debug.Log("recvList unsafe !!!");
                 }
                 
             }
-
             
         }
 
@@ -184,34 +178,23 @@ public class Client : MonoBehaviour
 
     // [Thread] 解析分解完的数据并根据数据进行相应操作
     private void Parase(){
-        string getstr = null;
         while(!threadstop){
+            string getstr = null;
             if(waitList.Count > 0){
-                // getstr = this.waitList[0];
-                // this.waitList.RemoveAt(0);
                 lock(waitList){
                     if(waitList.Count > 0) getstr = waitList.Dequeue();
                 }
-
+                
                 if(getstr != null){
-
                     Debug.Log("waitList中取出的"+getstr);
-                    if(getstr ==  null){
-                        Debug.Log("居然有一个空数据！！！！！"+DateTime.Now.TimeOfDay.ToString());
-                        continue;
-                    }
-
                     
                     if(getstr == "all player connected"){
                         this.timer_heartbeats.Change(-1,0);
                         this.isGaming = true;
-                        running=true;
-                        // timer_gaming = new System.Threading.Timer(SendGameInfo, null, 0, 10); //1000ms = 1s
+                        // tcy 在下面update加的标识，不知道有啥用。。
+                        running=true;                        
                         LockStepController.Instance.StartGame();
-                        Debug.Log("&&&&& 发送GamingInfo计时器成功启动，解析多条数据没有问题 ^_^!");
-                    }
-                    else if(getstr == null){
-                        Debug.Log("&&&&& 发送GamingInfo计时器没有启动，解析数据的问题！！");
+                        Debug.Log("接收到 all player connected，开始游戏 ^_^!");
                     }
                     else{
                         JObject res = JObject.Parse(getstr);
@@ -220,56 +203,40 @@ public class Client : MonoBehaviour
                         if(title.datatype == 1){
                             Debug.Log("调用 RecieveActions 接口");
                             Response all = res.ToObject<Response>();
-                            foreach(var resgame in all.content){
-                                LockStepController.Instance.RecieveActions(all.Roundnum, resgame.UserID, resgame.Opinions.ToArray()); 
+                            if(all.content != null){
+                                foreach(var resgame in all.content){
+                                    LockStepController.Instance.RecieveActions(all.Roundnum, resgame.UserID, resgame.Opinions.ToArray()); 
+                                }  
                             }
-                            this.SendAck(all.Roundnum);                            
+                            this.SendAck(all.Roundnum);
+                                                      
                             
                         }else if(title.datatype == 4){
                             Debug.Log("调用 ConfirmTrun 接口");
                             LockStepController.Instance.ConfirmTurn(title.Roundnum);
 
+                        }else{
+                            Debug.Log("接收到未知类型的reponse");
                         }
-                    }                 
+                    }                        
 
-
-                    // if(getstr.IndexOf("{\"result\"") != -1){
-                    //     GamingInfo info = (GamingInfo)Json.StringtoObj(getstr);
-                    //     if(info != null) Debug.Log("成功获得一个对象");
-                    // }
-                    // else{
-                    //     Debug.Log("存在未能有效使用的单句 ！！");
-                    // }
+                }else{
+                    Debug.Log("waitList中存在空数据 或 从空waitList中取数据");
                 }
                 
+                // 检查waitList
+                if(recvList.Count < 50){
+                    Debug.Log("waitList safe");
+                }
+                else{
+                    Debug.Log("waitList unsafe !!!");
+                }                
                 
             }
         }
     }
 
-
-    // private void Send(){
-    //     while(!threadstop){
-    //         if(sendList.Count > 0){
-    //             string str = null;
-    //             lock(lockerSend){
-    //                 if(sendList.Count > 0){
-    //                     str = sendList.Dequeue();
-    //                 }
-    //             }
-                
-    //             if(sendList.Count < 50){
-    //                 Debug.Log("sendList safe");
-    //             }else{
-    //                 Debug.Log("sendList unsafe !!!");
-    //             }
-
-
-    //         }
-            
-    //     }
-    // }
-
+    // 留出的接口 用于接收等待发送的游戏操作
     public void AddGamingInfo(Opinion op){
         lock(lockerChange){
             if(useSend){
@@ -303,29 +270,6 @@ public class Client : MonoBehaviour
             Debug.Log("Failed when send Heartbeats");
         }     
     }
-
-
-    // [Timer] 发送 GamingInfo (游戏数据)
-    // private void SendGameInfo(System.Object state){
-    //     Debug.Log("sending Game Info...");
-    //     try{
-    //         GamingInfo info  = (GamingInfo)Tests.assembly();
-    //         string jsonData = Json.ObjtoString(info);
-            
-    //         Debug.Log(jsonData);
-    //         byte[] ready = SocketSend.StringtoByte(jsonData);
-               
-    //         // this.sw.Write(ready);
-    //         // this.sw.Flush();
-    //         this.socket.Send(ready);
-    //     }catch{
-    //         Debug.Log("Failed when send Gameinfo");
-    //     }
-    // }
-
-
-
-
 
     // Start is called before the first frame update
     void Start()
@@ -363,7 +307,9 @@ public class Client : MonoBehaviour
             running=false;
         }
         if(running){
+            Debug.Log("is running");
             if(this.isGaming){
+                Debug.Log("is Gaming");
                 this.AccumilatedTime = this.AccumilatedTime + Time.deltaTime; // deltatime 是每一帧的时间,即每此update间隔的时间
 
                 while(this.AccumilatedTime > this.FrameLength){
@@ -378,23 +324,24 @@ public class Client : MonoBehaviour
     }
 
     private void GameFrameTurn(){
-
+        Debug.Log("GameFrame:"+this.GameFrame);
         this.GameFrame++;
         if(this.GameFrame == this.GameFramesPerLocksetpTurn) {
             this.GameFrame = 0;
             this.GameTurn++;
+            Debug.Log("GameTurn"+this.GameTurn);
             lock(lockerChange){
                 useSend = false;
             }
             if(useSend){
                 lock(sendList_2){
-                    Asse(ref sendList_2);
+                    SendInfo(ref sendList_2);
                     sendList_2.Clear();
                 }
             }
             else{
                 lock(sendList_1){
-                    Asse(ref sendList_1);
+                    SendInfo(ref sendList_1);
                     sendList_1.Clear();
                 }
             }
@@ -403,7 +350,8 @@ public class Client : MonoBehaviour
 
     }
 
-    private void Asse(ref Queue<Opinion> sendList){
+    private void SendInfo(ref Queue<Opinion> sendList){
+        Debug.Log("Sending GamingInfo");
         GamingInfo info = new GamingInfo();
         info.Roundnum = this.GameTurn;
         info.UserID = "holdonbush";
@@ -417,12 +365,15 @@ public class Client : MonoBehaviour
                 player5Hash = "dfasofoh12441414"};
         info.hash = hash_1;
         string str = JsonConvert.SerializeObject(info);
+        Debug.Log("Send str:"+str);
         byte[] buffer = SocketSend.StringtoByte(str);
+        Debug.Log("byte[]:"+buffer);
         this.socket.Send(buffer);
     }
 
     private void SendAck(int turnNum){
-        SendTitle tit = new SendTitle();
+        Debug.Log("Sending ack");
+        AckTitle tit = new AckTitle();
         tit.Roundnum = turnNum;
         tit.UserID = "holdonbush";
         tit.datatype = 3;

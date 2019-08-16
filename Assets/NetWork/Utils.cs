@@ -69,7 +69,7 @@ namespace NetUtils
             return min;
         }
         
-        // 从接收的原始 string 使用参数列表 分解粘连信息为单句 （未完全测试）
+        // 从接收的原始 string 使用参数列表 分解粘连信息为单句
         public static string split(string getstr, ref Queue<string> waitList, string[] para){
             
             int start;
@@ -110,18 +110,6 @@ namespace NetUtils
         }      
     }
 
-    public class Json{
-        // 从单句 string 解析 [json] 为 GamingInfo 
-        public static object StringtoObj(string str){
-            GamingInfo obj = JsonConvert.DeserializeObject<GamingInfo>(str);
-            return obj;
-        }
-        // 从 GamingInfo 生成 [json] 
-        public static string ObjtoString(GamingInfo obj){
-            string str = JsonConvert.SerializeObject(obj);
-            return str;
-        }  
-    }
 
     // public class Tests{
     //     // 组装待发送的游戏数据  测试用
