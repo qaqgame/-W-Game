@@ -40,7 +40,7 @@ public class LockStepController : MonoBehaviour
 
     public void Init(){
         LockStepTurnID = FirstLockStepTurnID;
-        pendingActions = new PendingActions(this);
+        pendingActions = new PendingActions();
 		confirmActions = new ConfirmActions();
 
         InitGame();

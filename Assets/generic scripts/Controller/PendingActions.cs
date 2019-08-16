@@ -17,10 +17,10 @@ public class PendingActions
 	
 
 	public int currentTurn;//当前回合
-	LockStepController lsm;
+	// LockStepController lsm;
 	
-	public PendingActions (LockStepController lsm) {
-		this.lsm = lsm;
+	public PendingActions () {
+		// this.lsm = lsm;
 		
 		CurrentActions = new List<IAction>();
 		NextActions = new List<IAction>();
@@ -94,7 +94,7 @@ public class PendingActions
 	
 	public bool ReadyForNextTurn() {	
 		//if this is the 1st turn, no actions had the chance to be recieved yet
-		if(lsm.LockStepTurnID == LockStepController.FirstLockStepTurnID) {
+		if(LockStepController.Instance.LockStepTurnID == LockStepController.FirstLockStepTurnID) {
 			return true;
 		}
 		if(currentActionsCount==0){
