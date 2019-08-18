@@ -33,7 +33,10 @@ public class BasicRoleControll : MonoBehaviour
             	{
                     Vector3 targetPosition=hit.point;
                     targetPosition.y=transform.position.y;
-            		LockStepController.Instance.SendAction(new Move(this.transform.name,0,targetPosition));          
+                    if(LockStepController.Instance.running){
+                        LockStepController.Instance.SendAction(new Move(this.transform.name,0,targetPosition));          
+                    }
+            		
             	}
 			}   
         }

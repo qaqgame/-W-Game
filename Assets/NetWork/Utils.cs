@@ -32,17 +32,18 @@ namespace NetUtils
     public class SocketRecv{
         // 从 socket 接收为 原始string 
         public static string socketrecv(ref Socket socket){
-            byte[] readbuff = new byte[4096];
-            int count = socket.Receive(readbuff);
-            string recv = System.Text.Encoding.Default.GetString(readbuff,0,count);
+            byte[] readbuffer = new byte[4096];
+            // int count = socket.BeginReceive(readbuffer, 0, readbuffer.Length, SocketFlags.None, new AsyncCallback(ReceiveCallback), socket);
+            int count = socket.Receive(readbuffer);
+            string recv = System.Text.Encoding.Default.GetString(readbuffer,0,count);
             return recv;
         } 
         
         // 创建参数列表 每个参数要求超过5字符！！（用于分解接收的原始 string）
         public static string[] getParameter(){
             string para_1 = "{\"datatype\":1";
-            string para_3 = "{\"datatype\":4";
-            string para_2 = "all player connected";
+            string para_2 = "{\"datatype\":4";
+            string para_3 = "GameStart";
             // string para_2 = "";
             string[] paraList = new string[3];
             paraList[0] = para_1;
@@ -54,7 +55,7 @@ namespace NetUtils
         private static int IndexHelp(string getstr, string[] para, int from = 0){
             int num = 1;
             int min = getstr.IndexOf(para[0], from);
-            Debug.Log("IndexHelp 第一次的min值"+min);
+            //Debug.Log("IndexHelp 第一次的min值"+min);
 
             while(num < para.Length){
                 int temp = getstr.IndexOf(para[num], from);
@@ -65,7 +66,7 @@ namespace NetUtils
                 }
                 num++;
             }
-            Debug.Log("IndexHelp 返回的min值"+min);
+            //Debug.Log("IndexHelp 返回的min值"+min);
             return min;
         }
         
@@ -76,9 +77,9 @@ namespace NetUtils
             int end = 0;
 
             if(waitList.Count < 50){
-                Debug.Log("waitList safe");
+                //Debug.Log("waitList safe");
             }else{
-                Debug.Log("waitList unsafe !!!");
+                //Debug.Log("waitList unsafe !!!");
             }
 
 

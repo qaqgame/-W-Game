@@ -21,7 +21,7 @@ public class LockStepController : MonoBehaviour
     Client client;
 
     bool initialized = false;
-	bool running=false;
+	public bool running=false;
 
     // Start is called before the first frame update
     void Awake()
@@ -85,14 +85,15 @@ public class LockStepController : MonoBehaviour
     }
     //确认回合
     public void ConfirmTurn(int turn){
-		if(turn<=LockStepTurnID||turn>LockStepTurnID+3){
+		if(turn<=LockStepTurnID){
 			Debug.LogError("can't confirm turn:"+turn+",current turn:"+LockStepTurnID);
 			return;
 		}
-		confirmActions.Confirm(turn-LockStepTurnID-1);
+		confirmActions.Confirm(turn);
     }
 
     private bool NextTurn() {
+		//Debug.Log("tcy当前动作数："+pendingActions.currentActionsCount+"  当前回合："+LockStepTurnID);
 		if(confirmActions.ReadyForNextTurn() && pendingActions.ReadyForNextTurn()) {
 			//增加回合数
 			LockStepTurnID++;
@@ -100,7 +101,6 @@ public class LockStepController : MonoBehaviour
 			confirmActions.NextTurn();
 			//将待执行action移至下一回合
 			pendingActions.NextTurn();
-			
 			return true;
 		}
 		
@@ -115,11 +115,18 @@ public class LockStepController : MonoBehaviour
 
 	private int gameFrame=0;
 	
+	private bool isFirst = true;
 	//called once per unity frame
 	public void Update() {
+		if(this.isFirst){
+			this.isFirst = false;
+			Debug.Log("tcy调用接口");
+			client.AddReady();
+		}
 		if(!running){
 			return;
 		}
+		
 		//Basically same logic as FixedUpdate, but we can scale it by adjusting FrameLength
 		accumilatedTime = accumilatedTime + Time.deltaTime;
 		
@@ -139,7 +146,7 @@ public class LockStepController : MonoBehaviour
 		} else {
 			ProcessActions(gameFrame);
 			gameFrame++;
-			if(gameFrame == gameFramesPerLocksetpTurn) {
+			if(gameFrame > gameFramesPerLocksetpTurn) {
 				gameFrame = 0;
 			}
 		}

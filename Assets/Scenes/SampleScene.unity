@@ -209,7 +209,7 @@ GameObject:
   - component: {fileID: 282840812}
   - component: {fileID: 282840816}
   - component: {fileID: 282840818}
-  - component: {fileID: 282840819}
+  - component: {fileID: 282840817}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -358,8 +358,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LockStepTurnID: 0
-  frameLength: 0.05
+  running: 0
+  frameLength: 0.005
   gameFramesPerLocksetpTurn: 4
+--- !u!114 &282840817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 282840810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 439a1443d654d914183f6f0c6d7a3595, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverIp: 127.0.0.1
+  serverPort: 8080
 --- !u!114 &282840818
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -372,20 +387,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb6fccf967e6edf49ae7530d17bd30af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &282840819
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 282840810}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 439a1443d654d914183f6f0c6d7a3595, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serverIp: 120.79.240.163
-  serverPort: 8080
 --- !u!1 &401346996
 GameObject:
   m_ObjectHideFlags: 0

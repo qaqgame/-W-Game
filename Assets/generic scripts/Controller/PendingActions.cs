@@ -10,7 +10,7 @@ public class PendingActions
 	//incase other players advance to the next step and send their action before we advance a step
 	private List<IAction> NextNextNextActions;
 	
-	private int currentActionsCount;
+	public int currentActionsCount;
 	private int nextActionsCount;
 	private int nextNextActionsCount;
 	private int nextNextNextActionsCount;
@@ -36,9 +36,10 @@ public class PendingActions
 	
 	public void NextTurn() {
 		//Finished processing this turns actions - clear it
-		for(int i=0; i<CurrentActions.Count; i++) {
-			CurrentActions[i] = null;
-		}
+		// for(int i=0; i<CurrentActions.Count; i++) {
+		// 	CurrentActions[i] = null;
+		// }
+		CurrentActions.Clear();
 		List<IAction> swap = CurrentActions;
 		
 		//last turn's actions is now this turn's actions
