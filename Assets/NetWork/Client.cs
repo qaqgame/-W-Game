@@ -21,7 +21,7 @@ public class Client : MonoBehaviour
     [SerializeField]
     public static float frameStep = 0.005f;  // 每0.05s = 50ms 一帧
 
-    public static String userID="glodxy";//用户id，用于send与sendack，作为用户标识（昵称）
+    public static String userID="smili";//用户id，用于send与sendack，作为用户标识（昵称）
 
     // socket 参数
     Socket socket;
@@ -145,6 +145,9 @@ public class Client : MonoBehaviour
             this.buffer  = new byte[1024];
         }
     }
+
+    private int timerecv = 0;
+    private int timerecvcount = 0;
     // [Thread] 接收并存储数据
     private void ReceiveFromServer(){
         while(!threadstop){
@@ -161,7 +164,10 @@ public class Client : MonoBehaviour
                 // catch(SocketException ex){
                 //     Debug.Log("BeginRecv 失败");
                 // }
-                
+                this.timerecvcount++;
+                int start = System.Environment.TickCount;
+
+
                 string recv = SocketRecv.socketrecv(ref this.socket);
                 if(recv == null){
                     //Debug.Log("从socket里边拿出来就是空的");
@@ -171,6 +177,10 @@ public class Client : MonoBehaviour
                 lock (lockerRecv){                    
                     recvList.Enqueue(recv);
                 }
+
+                int now = System.Environment.TickCount - start;
+                this.timerecv += now;
+
             }
             catch(SocketException ex){
                 Debug.Log("Failed when write to buffer"+DateTime.Now.TimeOfDay.ToString());
@@ -178,7 +188,14 @@ public class Client : MonoBehaviour
         }
     }
 
+    private int timerecvcallback = 0;
+    private int timerecvcallbackcount = 0;
     private void ReceiveCallback(IAsyncResult ar){
+
+        this.timerecvcallbackcount++;
+                int start = System.Environment.TickCount;
+
+
         TestSocket ts = (TestSocket)ar.AsyncState;
         int count  = ts.socket.EndReceive(ar);
         if(!ts.socket.Connected) Debug.Log("检查socket时发现链接断开");
@@ -196,14 +213,24 @@ public class Client : MonoBehaviour
             Debug.Log("接收失败");
         }
         
-        
+        int now = System.Environment.TickCount - start;
+                this.timerecvcallback += now;
     }
+
+
+    private int timesepa = 0;
+    private int timesepacount = 0;
     // [Thread] 分解接收到的多条数据为单条
     private void Separation(){
         while(!threadstop){
             string getstr = null;
 
             if(recvList.Count > 0){
+
+                this.timesepacount++;
+                int start = System.Environment.TickCount;
+
+
                 lock(lockerRecv){
                     if(recvList.Count > 0){
                         getstr = recvList.Dequeue();
@@ -225,6 +252,9 @@ public class Client : MonoBehaviour
                 else{
                     //Debug.Log("recvList unsafe !!!");
                 }
+
+                int now = System.Environment.TickCount - start;
+                this.timesepa += now;
                 
             }
             
@@ -232,12 +262,20 @@ public class Client : MonoBehaviour
 
     }
 
+
+    private int timepara = 0;
+    private int timeparacount = 0;
     // [Thread] 解析分解完的数据并根据数据进行相应操作
     private void Parase(){
         
         while(!threadstop){
             string getstr = null;
             if(waitList.Count > 0){
+
+                this.timeparacount++;
+                int start = System.Environment.TickCount;
+
+
                 lock(waitList){
                     if(waitList.Count > 0) getstr = waitList.Dequeue();
                 }
@@ -264,16 +302,18 @@ public class Client : MonoBehaviour
                             Response all = res.ToObject<Response>();
                             if(all.content != null){
                                 foreach(var resgame in all.content){
-                                    LockStepController.Instance.RecieveActions(all.Roundnum, resgame.UserID, resgame.Opinions.ToArray()); 
+                                    if(resgame.Opinions != null){
+                                        LockStepController.Instance.RecieveActions(all.Roundnum, resgame.UserID, resgame.Opinions.ToArray()); 
+                                    }
                                 }  
                             }
                             this.SendAck(all.Roundnum);
+                            
                                                       
                             
                         }else if(title.datatype == 4){
-                            Debug.Log("调用 ConfirmTrun 接口，传入回合："+title.Roundnum);
+                            // Debug.Log("调用 ConfirmTrun 接口，传入回合："+title.Roundnum);
                             LockStepController.Instance.ConfirmTurn(title.Roundnum);
-
                         }else{
                             Debug.Log("接收到未知类型的reponse");
                         }
@@ -289,7 +329,11 @@ public class Client : MonoBehaviour
                 }
                 else{
                     //Debug.Log("waitList unsafe !!!");
-                }                
+                }     
+
+
+                int now = System.Environment.TickCount - start;
+                this.timepara += now;           
                 
             }
         }
@@ -303,17 +347,19 @@ public class Client : MonoBehaviour
 
     }
 
-    private static Dictionary<int, int> testUseTime = new Dictionary<int, int>();
-    private int countNumAPI = 0;
-    private int countNumSend = 0;
     
+    private int timeaddinfo = 0;
+    private int timeaddinfocount = 0;
     // 留出的接口 用于接收等待发送的游戏操作
     public void AddGamingInfo(Opinion op){
-        this.countNumAPI++;
-        testUseTime.Add(this.countNumAPI, System.Environment.TickCount);
+        
         // if(this.GameTurn - LockStepController.Instance.LockStepTurnID > 3){
         //     return;
         // }
+
+        this.timeaddinfocount++;
+                int start = System.Environment.TickCount;
+
         lock(lockerChange){
             if(useSend){
                 lock(sendList_1){
@@ -327,6 +373,10 @@ public class Client : MonoBehaviour
                 }
             }
         }       
+
+
+        int now = System.Environment.TickCount - start;
+                this.timeaddinfo += now;
         
     }
     
@@ -387,6 +437,13 @@ public class Client : MonoBehaviour
             this.threadstop = true;
             running=false;
             Debug.Log(" 已发送数量："+this.countAll+" type1 发送数量："+this.countType1+" ack发送数量："+this.countType2+" 锁完成次数："+this.testlocker+" 跳过的回合数："+this.countjump+" 减少的发送数据次数："+this.reduce);
+
+
+            Debug.Log("次数"+" "+this.timesendcount+" "+this.timesendinfocount+" "+this.timeaddinfocount+" "+this.timeparacount+" "+this.timesepacount+" "+this.timerecvcount);
+            Debug.Log("总时间"+" "+this.timesend+" "+this.timesendinfo+" "+this.timeaddinfo+" "+this.timepara+" "+this.timesepa+" "+this.timerecv);
+            // 计算用时
+            Debug.Log("timerecv:"+(this.timerecv/this.timerecvcount)+"timesepa:"+(this.timesepa/this.timesepacount)+"timepara:"+(this.timepara/this.timeparacount)+"timeaddinfo:"+(this.timeaddinfo/this.timeaddinfocount)+"timesendinfo:"+(this.timesendinfo/this.timesendinfocount)+"timesend:"+(this.timesend/this.timesendcount));
+
         }
         if(running){
             // Debug.Log("is running");
@@ -414,11 +471,20 @@ public class Client : MonoBehaviour
         this.GameFrame++;
     }
 
+
+    private int timesendinfo = 0;
+    private int timesendinfocount = 0;
+
     private int testlocker = 0;
     private bool isSending = false;
     private int countjump = 0;
     private void SendInfo(System.Object state){
-        if(this.GameTurn - LockStepController.Instance.LockStepTurnID > 10){
+
+        this.timesendinfocount++;
+                int start = System.Environment.TickCount;
+
+
+        if(this.GameTurn - LockStepController.Instance.LockStepTurnID > 3){
             return;
         }
         if(this.isSending){
@@ -454,15 +520,22 @@ public class Client : MonoBehaviour
         // 保证计时器发送send上一次没执行完就不发
         this.isSending = false;
 
-        this.countNumSend++;
-        
-        Debug.Log("第"+this.countNumSend+"次调用API开始到发送结束用时(ms)："+ (System.Environment.TickCount - testUseTime[this.countNumSend]).ToString());
-        testUseTime.Remove(this.countNumSend);    
+        int now = System.Environment.TickCount - start;
+                this.timesendinfo += now;
     }
+
+    private int timesend = 0;
+    private int timesendcount = 0;
+    
     private int lastTurn = -1;
     private int reduce = 0;
     private void Send(ref Queue<Opinion> sendList){
         
+        this.timesendcount++;
+                int start = System.Environment.TickCount;
+
+
+
         this.countType1++;
         //Debug.Log("Sending GamingInfo"+this.countType1);
         GamingInfo info = new GamingInfo();
@@ -484,6 +557,7 @@ public class Client : MonoBehaviour
             return;
         }
 
+        
         string str = JsonConvert.SerializeObject(info);
         //string end = DateTime.Now.TimeOfDay.ToString();
         //Debug.Log("序列化开始时间"+start);
@@ -492,6 +566,8 @@ public class Client : MonoBehaviour
         
         Debug.Log("Send str:"+str);
         byte[] buffer = SocketSend.StringtoByte(str);
+          
+        
         // this.socket.Send(buffer);
         
         // string testsocket = "{\"datatype\":2,\"UserID\":\"holdonbush\",\"Roundnum\":12,\"Opinions\":[{\"type\":\"move\",\"desc\":\"130*144\",\"target\":\"none\",\"position\":\"0*0\",\"framenum\":4},{\"type\":\"skill\",\"desc\":\"123\",\"target\":\"144*144\",\"position\":\"100*70\",\"framenum\":5}],\"hash\":{\"player1Hash\":\"dfasofoh12441414\",\"player2Hash\":\"safdjojasfojofjs\",\"player3Hash\":\"fdsafoowjfojaofs\",\"player4Hash\":\"jfoasjoejfoajofj\",\"player5Hash\":\"ojojaodsjfiiofaj\"}}";
@@ -500,6 +576,10 @@ public class Client : MonoBehaviour
             
         this.socket.BeginSend(buffer, 0, buffer.Length, 0,new AsyncCallback(SendCallback), this.socket);
         this.lastTurn = info.Roundnum;
+
+
+        int now = System.Environment.TickCount - start;
+                this.timesend += now;
     }
 
     private void SendCallback(IAsyncResult ar){        

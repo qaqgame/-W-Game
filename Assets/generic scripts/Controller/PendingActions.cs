@@ -18,8 +18,10 @@ public class PendingActions
 	}
 	
 	public void NextTurn() {
-		idleActions[currentTurn].Clear();
-		idleActions.Remove(currentTurn);
+		if(idleActions.ContainsKey(currentTurn)){
+			idleActions[currentTurn].Clear();
+			idleActions.Remove(currentTurn);
+		}
 		currentTurn++;
 	}
 	
