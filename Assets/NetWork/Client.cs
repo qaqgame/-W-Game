@@ -21,7 +21,7 @@ public class Client : MonoBehaviour
     [SerializeField]
     public static float frameStep = 0.005f;  // 每0.05s = 50ms 一帧
 
-    public static String userID;//用户id，用于send与sendack，作为用户标识（昵称）
+    public static String userID="glodxy";//用户id，用于send与sendack，作为用户标识（昵称）
 
     // socket 参数
     Socket socket;
@@ -72,7 +72,7 @@ public class Client : MonoBehaviour
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.SendBufferSize = 10240;
             socket.ReceiveBufferSize=10240;
-            //socket.NoDelay = true;
+            socket.NoDelay = true;
             // 这里是异步链接，但目前没有作用
 
             IAsyncResult result = socket.BeginConnect(this.serverIp, this.serverPort, new AsyncCallback(this.ConnectCallback), socket);
@@ -211,7 +211,7 @@ public class Client : MonoBehaviour
                 }
 
                 if(getstr != null){
-                    Debug.Log("recvList中取出："+getstr);
+                    //Debug.Log("recvList中取出："+getstr);
                     getstr = SocketRecv.split(getstr, ref waitList, SocketRecv.getParameter());
                     //Debug.Log("分解后剩余的数据（未加入waitList）" + getstr);
                 }else{

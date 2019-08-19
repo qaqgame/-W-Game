@@ -54,7 +54,7 @@ public class CameraControll : MonoBehaviour
         //Debug.Log("bounds(t,b,r,l):"+bounds);
  
         //在场景内查找Tag为Player的物体  
-        player = GameObject.FindGameObjectWithTag("Player").transform;  
+        player = GameObject.Find(Client.userID).transform;
            
         cameraFieldOfView=maxCameraFov;
         camera = this.GetComponent<Camera>();

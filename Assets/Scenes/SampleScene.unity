@@ -401,7 +401,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 439a1443d654d914183f6f0c6d7a3595, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  userID: 
   serverIp: 120.79.240.163
   serverPort: 8080
 --- !u!114 &282840818
@@ -491,7 +490,7 @@ GameObject:
   - component: {fileID: 493935579}
   - component: {fileID: 493935578}
   m_Layer: 0
-  m_Name: GameObject (1)
+  m_Name: smili
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1665,7 +1664,7 @@ GameObject:
   - component: {fileID: 1575476696}
   - component: {fileID: 1575476695}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: glodxy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2227,6 +2226,11 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 3990357264309824578, guid: 6446a5b46e62c9e47a685525d6af6131,
+        type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2058197553386485357, guid: 6446a5b46e62c9e47a685525d6af6131, type: 3}
     - {fileID: 2058197553386485356, guid: 6446a5b46e62c9e47a685525d6af6131, type: 3}
@@ -2355,6 +2359,11 @@ PrefabInstance:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: 6ffbeb211c1d1e44381a6900b8031f9f, type: 2}
+    - target: {fileID: 2181092327588678751, guid: 1da681f63e3e7504087133234e6d22cf,
+        type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3869855305943790332, guid: 1da681f63e3e7504087133234e6d22cf,
         type: 3}
       propertyPath: m_Constraints

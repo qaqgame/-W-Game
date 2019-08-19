@@ -4,92 +4,44 @@ using UnityEngine;
 
 public class PendingActions
 {
-    public List<IAction> CurrentActions;
-	private List<IAction> NextActions;
-	private List<IAction> NextNextActions;
-	//incase other players advance to the next step and send their action before we advance a step
-	private List<IAction> NextNextNextActions;
-	
-	public int currentActionsCount;
-	private int nextActionsCount;
-	private int nextNextActionsCount;
-	private int nextNextNextActionsCount;
+	Dictionary<int,List<IAction>> idleActions;
 	
 
-	public int currentTurn;//当前回合
 	// LockStepController lsm;
 	
 	public PendingActions () {
 		// this.lsm = lsm;
-		
-		CurrentActions = new List<IAction>();
-		NextActions = new List<IAction>();
-		NextNextActions = new List<IAction>();
-		NextNextNextActions = new List<IAction>();
-		
-		currentActionsCount = 0;
-		nextActionsCount = 0;
-		nextNextActionsCount = 0;
-		nextNextNextActionsCount = 0;
-		currentTurn=LockStepController.Instance.LockStepTurnID;
+		idleActions=new Dictionary<int,List<IAction>>();
 	}
 	
 	public void NextTurn() {
-		//Finished processing this turns actions - clear it
-		// for(int i=0; i<CurrentActions.Count; i++) {
-		// 	CurrentActions[i] = null;
-		// }
-		CurrentActions.Clear();
-		List<IAction> swap = CurrentActions;
-		
-		//last turn's actions is now this turn's actions
-		CurrentActions = NextActions;
-		currentActionsCount = nextActionsCount;
-		
-		//last turn's next next actions is now this turn's next actions
-		NextActions = NextNextActions;
-		nextActionsCount = nextNextActionsCount;
-		
-		NextNextActions = NextNextNextActions;
-		nextNextActionsCount = nextNextNextActionsCount;
-		
-		//set NextNextNextActions to the empty list
-		NextNextNextActions = swap;
-		nextNextNextActionsCount = 0;
-		currentTurn++;
+		idleActions[LockStepController.Instance.LockStepTurnID-1].Clear();
+		idleActions.Remove(LockStepController.Instance.LockStepTurnID -1);
 	}
 	
 	public void Porcess(int frame){
-		for(int i=0;i<CurrentActions.Count;++i){
-			if(frame>=CurrentActions[i].frameNum){
-				CurrentActions[i].Execute();
-				CurrentActions.RemoveAt(i);
-				currentActionsCount--;
+		int turn=LockStepController.Instance.LockStepTurnID;
+		if(idleActions.ContainsKey(turn)){
+			for(int i = idleActions[turn].Count-1; i>=0; i--){
+				if(frame>=idleActions[turn][i].frameNum){
+					idleActions[turn][i].Execute();
+					idleActions[turn].RemoveAt(i);
+				}
 			}
 		}
 	}
 
 	public void AddAction(IAction action,int currentLockStepTurn, int actionsLockStepTurn) {
-		//add action for processing later
-		if(actionsLockStepTurn == currentLockStepTurn + 3) {
-			//if action is for next turn, add for processing 3 turns away
-			NextNextNextActions.Add(action);
-			nextNextNextActionsCount++;
-		} else if(actionsLockStepTurn == currentLockStepTurn+2) {
-			//if recieved action during our current turn
-			//add for processing 2 turns away
-			
-			NextNextActions.Add(action);
-			nextNextActionsCount++;
-		} else if(actionsLockStepTurn == currentLockStepTurn +1) {
-			//if recieved action for last turn
-			//add for processing 1 turn away
-			
-			NextActions.Add(action);
-			nextActionsCount++;
-		} else {
-			//TODO: Error Handling
-			return;
+		//只存储之后回合的动作
+		if(actionsLockStepTurn>LockStepController.Instance.LockStepTurnID){
+			//如果已包含目标回合
+			if(idleActions.ContainsKey(actionsLockStepTurn)){
+				idleActions[actionsLockStepTurn].Add(action);
+			}
+			else{
+				List<IAction> newActionList=new List<IAction>();
+				idleActions.Add(actionsLockStepTurn,newActionList);
+			}
 		}
 	}
 	
@@ -98,7 +50,8 @@ public class PendingActions
 		if(LockStepController.Instance.LockStepTurnID == LockStepController.FirstLockStepTurnID) {
 			return true;
 		}
-		if(currentActionsCount==0){
+		//如果当前回合没有剩余动作
+		if(idleActions[LockStepController.Instance.LockStepTurnID].Count==0){
 			return true;
 		}
 		//if none of the conditions have been met, return false
