@@ -52,6 +52,15 @@ public class BasicRoleControll : MonoBehaviour
         animator.SetFloat("moveSpeed",speed);     
     }
 
+    public void Dance(int num){
+        animator.SetInteger("state",2);
+        animator.SetInteger("dance_num",num);
+    }
+
+    public void Stop(){
+        animator.SetInteger("state",0);
+    }
+
     void FixedUpdate() {  
         if(animator.GetInteger("state")==1){
             float unitDistance=((float)speed*speedInfluence)*Time.fixedDeltaTime;//单位时间内移动距离
