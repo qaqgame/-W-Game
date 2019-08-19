@@ -31,5 +31,14 @@ public class MainRoleController : MonoBehaviour
             	}
 			}   
         }
+
+        //跳舞健
+        if(Input.GetKey(KeyCode.Alpha1)){
+            LockStepController.Instance.SendAction(new Dance(this.transform.name,0,1));
+        }
+
+        if(Input.GetKey(KeyCode.S)){
+            LockStepController.Instance.SendAction(new Stop(this.transform.name,0));
+        }
     }
 }

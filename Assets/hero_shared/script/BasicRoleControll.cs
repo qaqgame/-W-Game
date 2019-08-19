@@ -22,12 +22,7 @@ public class BasicRoleControll : MonoBehaviour
     {
         if(speed<0)
             speed=0;
-        // //跳舞健
-        // if(Input.GetKey(KeyCode.Alpha1)){
-        //     animator.SetInteger("state",2);
-        //     animator.SetInteger("dance_num",1);
-        //     Debug.Log("dance 1");
-        // }
+        
         // if(Input.GetKey(KeyCode.Alpha2)){
         //     animator.SetInteger("state",2);
         //     animator.SetInteger("dance_num",2);
@@ -37,9 +32,7 @@ public class BasicRoleControll : MonoBehaviour
         //     animator.SetInteger("dance_num",3);
         // }
 
-        // if(Input.GetKey(KeyCode.S)&&((animator.GetInteger("state")==1)||animator.GetInteger("state")==2)){
-        //     animator.SetInteger("state",0);
-        // }
+        
         #region for debug
             Debug.DrawLine(transform.position,endPosition,Color.green);
         #endregion
@@ -58,7 +51,9 @@ public class BasicRoleControll : MonoBehaviour
     }
 
     public void Stop(){
-        animator.SetInteger("state",0);
+        if(((animator.GetInteger("state")==1)||animator.GetInteger("state")==2)){
+            animator.SetInteger("state",0);
+        }
     }
 
     void FixedUpdate() {  
