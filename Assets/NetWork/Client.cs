@@ -307,13 +307,15 @@ public class Client : MonoBehaviour
                                     }
                                 }  
                             }
-                            this.SendAck(all.Roundnum);
+
+                            LockStepController.Instance.ConfirmTurn(title.Roundnum);
+                            // this.SendAck(all.Roundnum);
                             
                                                       
                             
-                        }else if(title.datatype == 4){
-                            // Debug.Log("调用 ConfirmTrun 接口，传入回合："+title.Roundnum);
-                            LockStepController.Instance.ConfirmTurn(title.Roundnum);
+                        // }else if(title.datatype == 4){
+                        //     // Debug.Log("调用 ConfirmTrun 接口，传入回合："+title.Roundnum);
+                        //     LockStepController.Instance.ConfirmTurn(title.Roundnum);
                         }else{
                             Debug.Log("接收到未知类型的reponse");
                         }
