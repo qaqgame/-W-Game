@@ -21,6 +21,8 @@ public class Client : MonoBehaviour
     [SerializeField]
     public static float frameStep = 0.005f;  // 每0.05s = 50ms 一帧
 
+    public static String userID;//用户id，用于send与sendack，作为用户标识（昵称）
+
     // socket 参数
     Socket socket;
     public string serverIp;
@@ -69,7 +71,8 @@ public class Client : MonoBehaviour
             
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             socket.SendBufferSize = 10240;
-            socket.NoDelay = true;
+            socket.ReceiveBufferSize=10240;
+            //socket.NoDelay = true;
             // 这里是异步链接，但目前没有作用
 
             IAsyncResult result = socket.BeginConnect(this.serverIp, this.serverPort, new AsyncCallback(this.ConnectCallback), socket);
@@ -231,6 +234,7 @@ public class Client : MonoBehaviour
 
     // [Thread] 解析分解完的数据并根据数据进行相应操作
     private void Parase(){
+        
         while(!threadstop){
             string getstr = null;
             if(waitList.Count > 0){
@@ -370,11 +374,14 @@ public class Client : MonoBehaviour
             //     //Debug.Log("执行完终止计时器！！！！!!!!!!!!!!!!!");
             // }
             if(timer_heartbeats != null){
+                
                 timer_heartbeats.Change(-1,0);
+                timer_heartbeats.Dispose();
                 //Debug.Log("执行完终止计时器！！！！!!!!!!!!!!!!!");
             }
             if(timer_gaming != null){
                 timer_gaming.Change(-1,0);
+                timer_gaming.Dispose();
             }
             this.socket.Close();
             this.threadstop = true;
@@ -420,7 +427,7 @@ public class Client : MonoBehaviour
 
         }
         this.isSending = true;
-        Debug.Log("发送前的当前回合数："+this.GameTurn);
+        //Debug.Log("发送前的当前回合数："+this.GameTurn);
         lock(lockerChange){
             useSend = !useSend;
         }
@@ -460,7 +467,7 @@ public class Client : MonoBehaviour
         //Debug.Log("Sending GamingInfo"+this.countType1);
         GamingInfo info = new GamingInfo();
         info.Roundnum = this.GameTurn;
-        info.UserID = "holdonbush";
+        info.UserID = userID;
         info.datatype = 2;
         info.Opinions = sendList;
         Hash hash_1 = new Hash(){
@@ -505,10 +512,10 @@ public class Client : MonoBehaviour
 
     private void SendAck(int turnNum){
         this.countType2++;
-        Debug.Log("Sending ack 回合数："+turnNum);
+        //Debug.Log("Sending ack 回合数："+turnNum);
         AckTitle tit = new AckTitle();
         tit.Roundnum = turnNum;
-        tit.UserID = "holdonbush";
+        tit.UserID = userID;
         tit.datatype = 3;
         string str = JsonConvert.SerializeObject(tit);
         byte[] buffer = SocketSend.StringtoByte(str);
