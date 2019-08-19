@@ -5,6 +5,8 @@ using UnityEngine;
 public class PendingActions
 {
 	Dictionary<int,List<IAction>> idleActions;
+
+	public int currentTurn;
 	
 
 	// LockStepController lsm;
@@ -12,20 +14,22 @@ public class PendingActions
 	public PendingActions () {
 		// this.lsm = lsm;
 		idleActions=new Dictionary<int,List<IAction>>();
+		currentTurn=LockStepController.Instance.LockStepTurnID;
 	}
 	
 	public void NextTurn() {
-		idleActions[LockStepController.Instance.LockStepTurnID-1].Clear();
-		idleActions.Remove(LockStepController.Instance.LockStepTurnID -1);
+		idleActions[currentTurn].Clear();
+		idleActions.Remove(currentTurn);
+		currentTurn++;
 	}
 	
 	public void Porcess(int frame){
-		int turn=LockStepController.Instance.LockStepTurnID;
-		if(idleActions.ContainsKey(turn)){
-			for(int i = idleActions[turn].Count-1; i>=0; i--){
-				if(frame>=idleActions[turn][i].frameNum){
-					idleActions[turn][i].Execute();
-					idleActions[turn].RemoveAt(i);
+		//int turn=LockStepController.Instance.LockStepTurnID;
+		if(idleActions.ContainsKey(currentTurn)){
+			for(int i = idleActions[currentTurn].Count-1; i>=0; i--){
+				if(frame>=idleActions[currentTurn][i].frameNum){
+					idleActions[currentTurn][i].Execute();
+					idleActions[currentTurn].RemoveAt(i);
 				}
 			}
 		}
@@ -38,8 +42,10 @@ public class PendingActions
 			if(idleActions.ContainsKey(actionsLockStepTurn)){
 				idleActions[actionsLockStepTurn].Add(action);
 			}
+			//否则添加新的list
 			else{
 				List<IAction> newActionList=new List<IAction>();
+				newActionList.Add(action);
 				idleActions.Add(actionsLockStepTurn,newActionList);
 			}
 		}
@@ -50,8 +56,8 @@ public class PendingActions
 		if(LockStepController.Instance.LockStepTurnID == LockStepController.FirstLockStepTurnID) {
 			return true;
 		}
-		//如果当前回合没有剩余动作
-		if(idleActions[LockStepController.Instance.LockStepTurnID].Count==0){
+		//如果当前回合没动作或者没有剩余动作
+		if((!idleActions.ContainsKey(currentTurn))||idleActions[currentTurn].Count==0){
 			return true;
 		}
 		//if none of the conditions have been met, return false
