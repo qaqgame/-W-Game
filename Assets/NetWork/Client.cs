@@ -18,7 +18,6 @@ using Newtonsoft.Json.Linq;
 public class Client : MonoBehaviour
 {
     // 帧时间
-    [SerializeField]
     public static float frameStep = 0.005f;  // 每0.05s = 50ms 一帧
 
     public static String userID="smili";//用户id，用于send与sendack，作为用户标识（昵称）
@@ -27,6 +26,9 @@ public class Client : MonoBehaviour
     Socket socket;
     public string serverIp;
     public int serverPort;
+
+    // 单机模式选项
+    public bool singleModel = false;
 
     // thread
     private Thread threadRecv;
@@ -284,7 +286,7 @@ public class Client : MonoBehaviour
                     //Debug.Log("waitList中取出的"+getstr);
                     
                     if(getstr == "GameStart"){
-                        this.timer_heartbeats.Change(-1,0);
+                        if(this.timer_heartbeats != null) this.timer_heartbeats.Change(-1,0);
                         this.timer_gaming = new System.Threading.Timer(SendInfo, null, 0, 20);
                         this.isGaming = true;
                         // tcy 在下面update加的标识，不知道有啥用。。
@@ -309,6 +311,7 @@ public class Client : MonoBehaviour
                             }
 
                             LockStepController.Instance.ConfirmTurn(title.Roundnum);
+                            Debug.Log("调用 ConfirmTrun 接口，传入回合："+title.Roundnum);
                             // this.SendAck(all.Roundnum);
                             
                                                       
@@ -342,11 +345,18 @@ public class Client : MonoBehaviour
     }
     // 接口
     public void AddReady(){
-        Debug.Log("tcy告诉我Ready");
-        string str = "Ready";
-        byte[] buffer = SocketSend.StringtoByte(str);
-        this.socket.BeginSend(buffer, 0, buffer.Length, 0,new AsyncCallback(SendCallback), this.socket);
+        if(!singleModel){
+            Debug.Log("tcy告诉我Ready");
+            string str = "Ready";
+            byte[] buffer = SocketSend.StringtoByte(str);
+            this.socket.BeginSend(buffer, 0, buffer.Length, 0,new AsyncCallback(SendCallback), this.socket);
 
+        }else{
+            lock(waitList){
+                waitList.Enqueue("GameStart");
+            }
+        }
+        
     }
 
     
@@ -398,10 +408,21 @@ public class Client : MonoBehaviour
         }     
     }
 
+    private static sendHandler sendSelect;
     // Start is called before the first frame update
     void Start()
     {
-        this.Connect();
+        if(!this.singleModel){
+            sendSelect = new sendHandler(Send);
+            this.Connect();
+        }else{
+            // 启动解析信息线程
+            this.threadParase = new Thread(new ThreadStart(Parase));
+            this.threadParase.IsBackground = true;
+            this.threadParase.Start();
+
+            sendSelect = new sendHandler(SendSingle);
+        }
     }
 
 
@@ -435,7 +456,7 @@ public class Client : MonoBehaviour
                 timer_gaming.Change(-1,0);
                 timer_gaming.Dispose();
             }
-            this.socket.Close();
+            if(this.socket != null) this.socket.Close();
             this.threadstop = true;
             running=false;
             Debug.Log(" 已发送数量："+this.countAll+" type1 发送数量："+this.countType1+" ack发送数量："+this.countType2+" 锁完成次数："+this.testlocker+" 跳过的回合数："+this.countjump+" 减少的发送数据次数："+this.reduce);
@@ -480,6 +501,8 @@ public class Client : MonoBehaviour
     private int testlocker = 0;
     private bool isSending = false;
     private int countjump = 0;
+
+    delegate void sendHandler(ref Queue<Opinion> sendList);
     private void SendInfo(System.Object state){
 
         this.timesendinfocount++;
@@ -501,14 +524,14 @@ public class Client : MonoBehaviour
         }
         if(useSend){
             lock(sendList_2){
-                Send(ref sendList_2);
+                sendSelect(ref sendList_2);
                 this.testlocker++;
                 sendList_2.Clear();
             }
         }
         else{
             lock(sendList_1){
-                Send(ref sendList_1);
+                sendSelect(ref sendList_1);
                 this.testlocker++;
                 sendList_1.Clear();
             }
@@ -525,6 +548,11 @@ public class Client : MonoBehaviour
         int now = System.Environment.TickCount - start;
                 this.timesendinfo += now;
     }
+
+
+    
+
+
 
     private int timesend = 0;
     private int timesendcount = 0;
@@ -582,6 +610,34 @@ public class Client : MonoBehaviour
 
         int now = System.Environment.TickCount - start;
                 this.timesend += now;
+    }
+
+    private void SendSingle(ref Queue<Opinion> sendList){
+        Response res = new Response();
+        res.Roundnum = this.GameTurn;
+        res.result = "success";
+        res.datatype = 1;
+        ResGamingInfo info = new ResGamingInfo();
+        info.UserID = userID;
+        info.Opinions = sendList;
+        Queue<ResGamingInfo> temp = new Queue<ResGamingInfo>();
+        temp.Enqueue(info);
+        res.content = temp;
+        //string start = DateTime.Now.TimeOfDay.ToString();
+        if(res.Roundnum == this.lastTurn && info.Opinions.Count == 0){
+            Debug.Log("判断数据："+res.Roundnum+"上一回合："+this.lastTurn);
+            this.reduce++;
+            return;
+        }
+        
+        string str = JsonConvert.SerializeObject(res);
+        
+        Debug.Log("SendSingle str:"+str);
+        lock(waitList){
+            waitList.Enqueue(str);
+        }
+            
+        this.lastTurn = res.Roundnum;
     }
 
     private void SendCallback(IAsyncResult ar){        

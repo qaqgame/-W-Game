@@ -401,8 +401,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 439a1443d654d914183f6f0c6d7a3595, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serverIp: 120.79.240.163
+  serverIp: 127.0.0.1
   serverPort: 8080
+  singleModel: 0
 --- !u!114 &282840818
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -508,7 +509,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c25c7d9691a412b41acfba07fe7c391d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 400
+  speed: 1000
   speedInfluence: 0.01
   realObject: {fileID: 2058197554987352902}
 --- !u!4 &493935579
@@ -1682,7 +1683,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c25c7d9691a412b41acfba07fe7c391d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 400
+  speed: 1000
   speedInfluence: 0.01
   realObject: {fileID: 148478460}
 --- !u!4 &1575476696
@@ -1923,7 +1924,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c25c7d9691a412b41acfba07fe7c391d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 400
+  speed: 1000
   speedInfluence: 0.01
   realObject: {fileID: 1246453888}
 --- !u!4 &2040386223
