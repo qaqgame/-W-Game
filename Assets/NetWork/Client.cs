@@ -20,7 +20,7 @@ public class Client : MonoBehaviour
     // 帧时间
     public static float frameStep = 0.005f;  // 每0.05s = 50ms 一帧
 
-    public static String userID="smili";//用户id，用于send与sendack，作为用户标识（昵称）
+    public static String userID="glodxy";//用户id，用于send与sendack，作为用户标识（昵称）
 
     // socket 参数
     Socket socket;
@@ -311,7 +311,7 @@ public class Client : MonoBehaviour
                             }
 
                             LockStepController.Instance.ConfirmTurn(title.Roundnum);
-                            Debug.Log("调用 ConfirmTrun 接口，传入回合："+title.Roundnum);
+                            //Debug.Log("调用 ConfirmTrun 接口，传入回合："+title.Roundnum);
                             // this.SendAck(all.Roundnum);
                             
                                                       
@@ -465,7 +465,7 @@ public class Client : MonoBehaviour
             Debug.Log("次数"+" "+this.timesendcount+" "+this.timesendinfocount+" "+this.timeaddinfocount+" "+this.timeparacount+" "+this.timesepacount+" "+this.timerecvcount);
             Debug.Log("总时间"+" "+this.timesend+" "+this.timesendinfo+" "+this.timeaddinfo+" "+this.timepara+" "+this.timesepa+" "+this.timerecv);
             // 计算用时
-            Debug.Log("timerecv:"+(this.timerecv/this.timerecvcount)+"timesepa:"+(this.timesepa/this.timesepacount)+"timepara:"+(this.timepara/this.timeparacount)+"timeaddinfo:"+(this.timeaddinfo/this.timeaddinfocount)+"timesendinfo:"+(this.timesendinfo/this.timesendinfocount)+"timesend:"+(this.timesend/this.timesendcount));
+            Debug.Log("timerecv:"+(this.timerecv/this.timerecvcount)+"timesepa:"+(this.timesepa/this.timesepacount)+"timepara:"+(this.timepara/this.timeparacount)+"timesendinfo:"+(this.timesendinfo/this.timesendinfocount)+"timesend:"+(this.timesend/this.timesendcount));
 
         }
         if(running){
@@ -632,7 +632,7 @@ public class Client : MonoBehaviour
         
         string str = JsonConvert.SerializeObject(res);
         
-        Debug.Log("SendSingle str:"+str);
+        //Debug.Log("SendSingle str:"+str);
         lock(waitList){
             waitList.Enqueue(str);
         }

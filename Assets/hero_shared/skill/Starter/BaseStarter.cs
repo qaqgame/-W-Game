@@ -10,7 +10,7 @@ todoList:
  */
 public class BaseStarter : ScriptableObject
 {
-    Skill skill;
+    Skill skill=null;
     bool running=false;
     public Vector3 center;
 
@@ -18,14 +18,13 @@ public class BaseStarter : ScriptableObject
 
     protected GameObject obj;//技能指示器实体
     protected GameObject rootObject;//释放技能的主体
-    protected Camera camera;//主摄像机
     protected SkillController skillController;//技能控制器
 
     private static Vector2 lastMousePosition;//上次的鼠标位置
     private static Vector3 lastMouseWorldPosition;//上次的鼠标对应的世界坐标
     public BaseStarter(ref ObjectPicker _picker){
         picker=_picker;
-        center=new Vector3(0,0,0);
+        center=new Vector3(0,0.1f,0);
         rootObject=ParentObject();
         skillController=rootObject.GetComponent<SkillController>();
     }
@@ -37,8 +36,10 @@ public class BaseStarter : ScriptableObject
     }
 
     public void execute(){
-        onStart();
-
+        if(!running){
+            onStart();
+            skillController.executeStarter(this);
+        }
     }
 
     //每帧调用
@@ -51,14 +52,14 @@ public class BaseStarter : ScriptableObject
         else if(Input.GetMouseButtonDown(1)){
             onMouseRightClicked();
         }
+        Vector2 curPos=new Vector2(Input.mousePosition.x,Input.mousePosition.y);
 
-        if(Event.current.mousePosition!=lastMousePosition){
-            Vector2 curPos=Event.current.mousePosition;
-            onMouseMoved(curPos.x,curPos.y,curPos-lastMousePosition);
+        if(curPos!=lastMousePosition){
+            onMouseMoved(curPos.x,curPos.y,(curPos-lastMousePosition).normalized);
             lastMousePosition=curPos;
 
-            Vector3 curWorldPos=PositionUtil.ScreenToWorldPosition(curPos,MainObjectTypes.MAIN_PLANE);
-            onMouseWorldMoved(curWorldPos,curWorldPos-lastMouseWorldPosition);
+            Vector3 curWorldPos=PositionUtil.ScreenToWorldPosition(curPos,MainObjectTypes.MAIN_PLANE,MainLayerTypes.MAIN_PLANE);
+            onMouseWorldMoved(curWorldPos,(curWorldPos-lastMouseWorldPosition).normalized);
             lastMouseWorldPosition=curWorldPos;
         }
 
@@ -95,13 +96,16 @@ public class BaseStarter : ScriptableObject
     //结束目标选定
     protected virtual void onSuccess(){
         running=false;
+        skillController.endStarter(this);
         skillController.executeSkill(skill);
+        picker.execute();
         destroyObjects();
     }
 
     //中断目标选定
     protected virtual void onInterrupt(){
         running=false;
+        skillController.endStarter(this);
         destroyObjects();
     }
 
@@ -116,7 +120,8 @@ public class BaseStarter : ScriptableObject
     //鼠标左键持续按压时
     //param: time - 间隔时间
     protected virtual void onMouseHold(float time){
-        picker.store(time);
+        if(picker.storeEnergy)
+            picker.store(time);
     }
 
     protected virtual void onMouseMoved(float x,float y,Vector2 direction){
@@ -131,15 +136,16 @@ public class BaseStarter : ScriptableObject
 
     //销毁物体
     protected virtual void destroyObjects(){
-        Destroy(obj);
+        Debug.Log("destroy called");
         if(picker.visible){
-            Destroy(picker);
+            picker.destroy();
         }
+        Destroy(obj);
     }
 
 
     protected GameObject GameObjectInstance(){
-        GameObject _obj= Instantiate(Resources.Load(PrefabPath())) as GameObject;
+        GameObject _obj= Instantiate(Resources.Load("SkillBound/"+PrefabPath())) as GameObject;
         _obj.transform.SetParent(rootObject.transform);
         return _obj;
     }

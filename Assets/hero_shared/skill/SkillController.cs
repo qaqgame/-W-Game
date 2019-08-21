@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SkillController : MonoBehaviour
 {
-    BaseStarter skillStarter;
+    BaseStarter skillStarter=null;
     List<Skill> runningSkill;//在运行的技能
     // Start is called before the first frame update
     void Start()
@@ -16,7 +16,9 @@ public class SkillController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        skillStarter.update();
+        if(skillStarter!=null){
+            skillStarter.update();
+        }
         foreach (var skill in runningSkill)
         {
             skill.onUpdate();
@@ -24,7 +26,9 @@ public class SkillController : MonoBehaviour
     }
 
     void FixedUpdate() {
-        skillStarter.fixedUpdate();
+        if(skillStarter!=null){
+            skillStarter.fixedUpdate();
+        }
         foreach (var skill in runningSkill)
         {
             skill.onFixedUpdate();
@@ -32,14 +36,28 @@ public class SkillController : MonoBehaviour
     }
 
     public void executeSkill(Skill skill){
-        skill.execute();
-        //按照优先级将其加入技能list
-        int i=0;
-        while(runningSkill[i].priority<skill.priority){
-            if(++i>=runningSkill.Count){
-                break;
+        if(skill!=null){
+            skill.execute();
+            //按照优先级将其加入技能list
+            int i=0;
+            while(runningSkill[i].priority<skill.priority){
+                if(++i>=runningSkill.Count){
+                    break;
+                }
             }
+            runningSkill.Insert(i,skill);
         }
-        runningSkill.Insert(i,skill);
+    }
+
+    public void executeStarter(BaseStarter starter){
+        if(skillStarter==null){
+            skillStarter=starter;
+        }
+    }
+
+    public void endStarter(BaseStarter starter){
+        if(skillStarter==starter){
+            skillStarter=null;
+        }
     }
 }

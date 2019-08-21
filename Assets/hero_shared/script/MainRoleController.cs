@@ -5,10 +5,14 @@ using UnityEngine;
 public class MainRoleController : MonoBehaviour
 {
     public Camera camera;
+    public SkillController skillController;
+    private BaseStarter starter;
+    private ObjectPicker picker;
     // Start is called before the first frame update
     void Start()
     {
-        
+        picker=new CirclePicker(1,true,false);
+        starter=new CircleBoundStarter(ref picker,10);
     }
 
     // Update is called once per frame
@@ -17,13 +21,14 @@ public class MainRoleController : MonoBehaviour
         if (Input.GetMouseButtonDown(1))//当点击鼠标左键时（左键为0，右键为1）
         {
             try{
-                Vector3 targetPosition=PositionUtil.ScreenToWorldPosition(Input.mousePosition,MainObjectTypes.MAIN_LAND);
+                Vector3 targetPosition=PositionUtil.ScreenToWorldPosition(new Vector2(Input.mousePosition.x,Input.mousePosition.y),MainObjectTypes.MAIN_LAND,MainLayerTypes.MAIN_LAND);
                 targetPosition.y=transform.position.y;
                 if(LockStepController.Instance.running){
                     LockStepController.Instance.SendAction(new Move(this.transform.name,0,targetPosition));          
                 }
             }catch(UnityException exception){
-                Debug.Log("mouse right clicked to move error"+exception.ToString());
+                Debug.LogError("Input position:"+Input.mousePosition);
+                Debug.LogError("mouse right clicked to move error"+exception.ToString());
             }
         }
 
@@ -34,6 +39,9 @@ public class MainRoleController : MonoBehaviour
 
         if(Input.GetKey(KeyCode.S)){
             LockStepController.Instance.SendAction(new Stop(this.transform.name,0));
+        }
+        if(Input.GetKey(KeyCode.Q)){
+            starter.execute();
         }
     }
 }

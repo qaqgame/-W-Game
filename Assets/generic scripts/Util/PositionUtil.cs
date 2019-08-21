@@ -5,11 +5,11 @@ using UnityEngine;
 public class PositionUtil 
 {
     private static Camera mainCamera=GameObject.FindGameObjectWithTag(MainObjectTypes.MAIN_CAMERA).GetComponent<Camera>();
-    public static Vector3 ScreenToWorldPosition(Vector2 screenPosition,string objTag){
+    public static Vector3 ScreenToWorldPosition(Vector2 screenPosition,string objTag,string objLayer){
         Ray ray=mainCamera.ScreenPointToRay(new Vector3(screenPosition.x,screenPosition.y,0));
         RaycastHit hit;
         Vector3 targetPosition=new Vector3(0,0,0);
-        if(Physics.Raycast(ray, out hit))//Physics.Raycast()表示当射线（ray）与任何碰撞体发生接触时返回true，否则返回false
+        if(Physics.Raycast(ray, out hit,1000,LayerMask.GetMask(objLayer)))//Physics.Raycast()表示当射线（ray）与任何碰撞体发生接触时返回true，否则返回false
         {
             if (hit.collider.gameObject.tag == objTag)//当射线碰撞到的是Plane（此if语句限制鼠标点击位置在Plane上有效）
             {
@@ -18,5 +18,13 @@ public class PositionUtil
             }
         }
         throw new UnityException("screen position:"+screenPosition+" can not get the hit point of "+objTag);
+    }
+
+    public static Vector3 RelativeToWorldPosition(Vector3 relativePos,string objName){
+        return GameObject.Find(objName).transform.position+relativePos;
+    }
+
+    public static Vector3 WorldToRelativePosition(Vector3 worldPos,string objName){
+        return worldPos-GameObject.Find(objName).transform.position;
     }
 }

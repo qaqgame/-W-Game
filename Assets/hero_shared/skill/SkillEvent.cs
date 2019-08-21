@@ -8,7 +8,7 @@ public class SkillEvent : ScriptableObject
 {
     public ObjectPicker picker;
     public List<Condition> conditions;//该事件的条件
-    public List<int> objects;//目标对象的id
+    public List<string> objects;//目标对象的name
     public float startTime;//开始时间
     public List<Action> startActions;//开始事件
     protected Skill skill;//所属技能
