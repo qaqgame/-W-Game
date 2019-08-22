@@ -402,7 +402,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 439a1443d654d914183f6f0c6d7a3595, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serverIp: 127.0.0.1
+  serverIp: 120.79.240.163
   serverPort: 8080
   singleModel: 1
 --- !u!114 &282840818
@@ -491,6 +491,7 @@ GameObject:
   m_Component:
   - component: {fileID: 493935579}
   - component: {fileID: 493935578}
+  - component: {fileID: 493935580}
   m_Layer: 0
   m_Name: smili
   m_TagString: MainObject
@@ -528,6 +529,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &493935580
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 493935577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b16195427c8c50e4ca574b0526b8bb50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &581453893
 GameObject:
   m_ObjectHideFlags: 0
@@ -1963,6 +1976,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2040386223}
   - component: {fileID: 2040386222}
+  - component: {fileID: 2040386224}
   m_Layer: 0
   m_Name: holdonbush
   m_TagString: MainObject
@@ -2000,6 +2014,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2040386224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2040386221}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b16195427c8c50e4ca574b0526b8bb50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2097517428
 PrefabInstance:
   m_ObjectHideFlags: 0

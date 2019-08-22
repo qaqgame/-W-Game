@@ -5,17 +5,28 @@ using UnityEngine;
 public class Action:ScriptableObject{
     public bool continuous=false;//是否持续
     protected Skill skill;
+    protected SkillEvent skillEvent;
+    
 
-    public Skill OweSkill{
-        set{skill=value;}
-        get{return skill;}
+    public Action(ref SkillEvent _skillEvent){
+        skill=_skillEvent.skill;
+        skillEvent=_skillEvent;
     }
 
-    public virtual void execute(){
+    public void execute(){
         if(continuous)
         {
             skill.continuousActions.Add(this);
         }
+        onStart();
+    }
+
+    protected virtual void onStart(){
+
+    }
+
+    protected virtual void onEnd(){
+
     }
 
     public virtual void update(){
@@ -26,6 +37,7 @@ public class Action:ScriptableObject{
         if(continuous){
             skill.continuousActions.Remove(this);
         }
+        onEnd();
     }
 
     public virtual void reset(){

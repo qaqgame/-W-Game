@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Skill : ScriptableObject
 {
+    public BaseStarter starter;
     public int id;//编号
     public string content;//描述
     public int priority;//优先级
@@ -18,6 +19,18 @@ public class Skill : ScriptableObject
 
     protected List<SkillEvent> usedEvent;
 
+    public SkillController skillController=null;
+
+    public Skill(){
+        runningEvent=new List<TimerEvent>();
+        startEvent=new List<SkillEvent>();
+        endEvent=new List<SkillEvent>();
+        interruptEvent=new List<SkillEvent>();
+        events=new List<SkillEvent>();
+        continuousActions=new List<Action>();
+        usedEvent=new List<SkillEvent>();
+    }
+
     //外部调用，执行
     public void execute(){
         runnning=true;
@@ -28,24 +41,26 @@ public class Skill : ScriptableObject
     public virtual void onStart(){
         foreach (var e in startEvent)
         {
-            e.onStart();
+            e.execute();
         }
     }
     //更新时
     public virtual void onUpdate(){
-        int i=0;
-        //更新events
-        while(Time.time-startTime>events[i].startTime){
-            //如果i位置的event可以执行
-            if(ConditionUtil.CheckConditions(events[i].conditions)){
-                //执行并从events中移除
-                events[i].execute();
-                events.Remove(events[i]);
-                usedEvent.Add(events[i]);
-            }
-            //否则检查下一个
-            if(++i>=events.Count){
-                break;
+        if(events.Count>0){
+            int i=0;
+            //更新events
+            while(Time.time-startTime>=events[i].startTime){
+                //如果i位置的event可以执行
+                if(ConditionUtil.CheckConditions(events[i].conditions)){
+                    //执行并从events中移除
+                    events[i].execute();
+                    usedEvent.Add(events[i]);
+                    events.Remove(events[i]);
+                }
+                //否则检查下一个
+                if(++i>=events.Count){
+                    break;
+                }
             }
         }
         //更新action
@@ -65,7 +80,7 @@ public class Skill : ScriptableObject
     public virtual void onEnd(){
         foreach (var e in endEvent)
         {
-            e.onStart();
+            e.execute();
         }
     }
     //中断时
@@ -76,7 +91,7 @@ public class Skill : ScriptableObject
         }
         foreach (var e in interruptEvent)
         {
-            e.onStart();
+            e.execute();
         }
     }
     //重置
@@ -89,6 +104,7 @@ public class Skill : ScriptableObject
         }
         events.Sort((x, y) => x.startTime.CompareTo(y.startTime));
         usedEvent.Clear();
+        skillController=null;
         resetAllEvent();
     }
     //重置所有事件
@@ -109,5 +125,9 @@ public class Skill : ScriptableObject
         {
             e.reset();
         }
+    }
+
+    public virtual Skill getNewInstance(){
+        return this.MemberwiseClone() as Skill;
     }
 }

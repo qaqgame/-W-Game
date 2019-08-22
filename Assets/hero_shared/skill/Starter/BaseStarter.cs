@@ -14,7 +14,7 @@ public class BaseStarter : ScriptableObject
     bool running=false;
     public Vector3 center;
 
-    protected ObjectPicker picker;//选择器
+    public ObjectPicker picker;//选择器
 
     protected GameObject obj;//技能指示器实体
     protected GameObject rootObject;//释放技能的主体
@@ -22,16 +22,18 @@ public class BaseStarter : ScriptableObject
 
     private static Vector2 lastMousePosition;//上次的鼠标位置
     private static Vector3 lastMouseWorldPosition;//上次的鼠标对应的世界坐标
-    public BaseStarter(ref ObjectPicker _picker){
+    public BaseStarter(ref ObjectPicker _picker,ref Skill _skill){
         picker=_picker;
-        center=new Vector3(0,0.1f,0);
+        center=new Vector3(0,0,0);
         rootObject=ParentObject();
+        skill=_skill;
         skillController=rootObject.GetComponent<SkillController>();
     }
-    public BaseStarter(ref ObjectPicker _picker,Vector3 _center){
+    public BaseStarter(ref ObjectPicker _picker,Vector3 _center,ref Skill _skill){
         picker=_picker;
         center=_center;
         rootObject=ParentObject();
+        skill=_skill;
         skillController=rootObject.GetComponent<SkillController>();
     }
 
@@ -97,8 +99,7 @@ public class BaseStarter : ScriptableObject
     protected virtual void onSuccess(){
         running=false;
         skillController.endStarter(this);
-        skillController.executeSkill(skill);
-        picker.execute();
+        LockStepController.Instance.SendAction(new ExecuteSkill(Client.userID,0,skill.id,picker.center));
         destroyObjects();
     }
 
@@ -139,7 +140,9 @@ public class BaseStarter : ScriptableObject
         Debug.Log("destroy called");
         if(picker.visible){
             picker.destroy();
+            picker.center=new Vector3(0,0,0);
         }
+        center=new Vector3(0,0,0);
         Destroy(obj);
     }
 

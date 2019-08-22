@@ -7,10 +7,10 @@ public class CircleBoundStarter : BaseStarter
     
     public float radius;
 
-    public CircleBoundStarter(ref ObjectPicker _picker,float _radius):base(ref _picker){
+    public CircleBoundStarter(ref ObjectPicker _picker,float _radius,ref Skill _skill):base(ref _picker,ref _skill){
         radius=_radius;
     }
-    public CircleBoundStarter(ref ObjectPicker _picker,float _radius,Vector3 _center):base(ref _picker,_center){
+    public CircleBoundStarter(ref ObjectPicker _picker,float _radius,Vector3 _center,ref Skill _skill):base(ref _picker,_center,ref _skill){
         radius=_radius;
     }
 
@@ -26,6 +26,7 @@ public class CircleBoundStarter : BaseStarter
     protected override void onMouseWorldMoved(Vector3 currentPos, Vector3 direction){
         Vector3 targetPos=currentPos;
         Vector3 worldCenter=PositionUtil.RelativeToWorldPosition(center,ParentObject().name);
+        //Debug.Log("target pos:"+targetPos+" world center:"+worldCenter);
         //如果鼠标距离中心大于半径
         if((targetPos-worldCenter).sqrMagnitude>radius*radius){
             targetPos=worldCenter+((targetPos-worldCenter).normalized)*radius;

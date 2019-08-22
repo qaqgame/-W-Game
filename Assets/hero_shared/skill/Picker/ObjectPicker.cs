@@ -6,10 +6,7 @@ public class ObjectPicker : ScriptableObject
 {
     public bool visible=false;//该对象选择器是否可见
     public bool storeEnergy=false;//是否可蓄力
-
-    protected SkillEvent skillEvent=null;
-
-    protected Vector3 center;
+    public Vector3 center;
 
     protected GameObject obj;
 
@@ -19,15 +16,8 @@ public class ObjectPicker : ScriptableObject
         center=new Vector3(0,0,0);
     }
 
-    public void setSkillEvent(SkillEvent _event){
-        skillEvent=_event;
-    }
-
-    public void execute(){
-        List<string> list=FilterObject();
-        if(skillEvent!=null){
-            skillEvent.objects=FilterObject();
-        }
+    public List<string> execute(){
+        return FilterObject();
     }
 
     //筛选对象，必须重写
@@ -40,12 +30,11 @@ public class ObjectPicker : ScriptableObject
         obj=Instantiate(Resources.Load("Picker/"+PrefabPath())) as GameObject; 
         obj.transform.SetParent(ParentObject().transform);
         Debug.Log("picker center:"+center);
-        obj.transform.localPosition=center;
+        obj.transform.localPosition=new Vector3(0,0,0);
     }
 
     //销毁该选择器（如果可见）
     public virtual void destroy(){
-        center=new Vector3(0,0,0);
         Destroy(obj);
     }
 
@@ -56,8 +45,11 @@ public class ObjectPicker : ScriptableObject
 
     //设置坐标（在鼠标移动时调用）
     public virtual void setPosition(Vector3 _position){
-        obj.transform.localPosition=PositionUtil.WorldToRelativePosition(_position,ParentObject().name);
-        center=PositionUtil.WorldToRelativePosition(_position,ParentObject().name);
+        if(obj!=null){
+            obj.transform.position=_position;
+        }
+        //Debug.Log("set picker --world:"+_position+" --relative:"+obj.transform.localPosition);
+        center=_position;
     }
 
     //设置缩放（在蓄力时调用）
@@ -74,5 +66,6 @@ public class ObjectPicker : ScriptableObject
     protected virtual GameObject ParentObject(){
         return GameObject.Find(Client.userID);
     }
+
 
 }

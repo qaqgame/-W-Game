@@ -2,17 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FinishSkill : MonoBehaviour
+public class FinishSkill : Action
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
+    public FinishSkill(ref SkillEvent _skillEvent):base(ref _skillEvent){
+        continuous=false;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    protected override void onStart(){
+        skill.skillController.endSkill(skill);
     }
 }

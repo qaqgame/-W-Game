@@ -23,6 +23,9 @@ namespace IActionUtil
                 case IActionType.STOP:{
                     return ParseForStop(objName,opinion);
                 }
+                case IActionType.SKILL:{
+                    return ParseForSkill(objName,opinion);
+                }
             }
             return null;
         }
@@ -47,6 +50,13 @@ namespace IActionUtil
         protected static IAction ParseForStop(string objName,Opinion opinion){
             Stop stop=new Stop(objName,opinion.framenum);
             return stop;
+        }
+
+        protected static IAction ParseForSkill(string objName,Opinion opinion){
+            int skillID=int.Parse(opinion.desc);
+            Vector3 position=PositionUtil.StringToVector3(opinion.target);
+            ExecuteSkill executeSkill=new ExecuteSkill(objName,opinion.framenum,skillID,position);
+            return executeSkill;
         }
     }
 }

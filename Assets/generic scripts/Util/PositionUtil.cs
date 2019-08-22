@@ -21,10 +21,16 @@ public class PositionUtil
     }
 
     public static Vector3 RelativeToWorldPosition(Vector3 relativePos,string objName){
-        return GameObject.Find(objName).transform.position+relativePos;
+        return GameObject.Find(objName).transform.TransformPoint(relativePos);
     }
 
     public static Vector3 WorldToRelativePosition(Vector3 worldPos,string objName){
-        return worldPos-GameObject.Find(objName).transform.position;
+        return GameObject.Find(objName).transform.InverseTransformPoint(worldPos);
+    }
+
+    public static Vector3 StringToVector3(string s){
+        s=s.Replace("(","").Replace(")","");
+        string[] result=s.Split(',');
+        return new Vector3(float.Parse(result[0]),float.Parse(result[1]),float.Parse(result[2]));
     }
 }

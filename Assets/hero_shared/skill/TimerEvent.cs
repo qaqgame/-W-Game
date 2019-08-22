@@ -25,10 +25,11 @@ public class TimerEvent : SkillEvent{
     }
 
     public override void onFixedUpdate(){
-        if(curTimes<times&&Time.time>startTime+(curTimes+1)*intervalTime){
+        //间隔时间>=0
+        if(intervalTime>=0&&curTimes<times&&Time.time>eventStartTime+(curTimes+1)*intervalTime){
             onTimerUpdate();
         }
-        if(Time.time>=startTime+timeLength)
+        if(Time.time>=eventStartTime+timeLength)
             onEnd();
     }
 

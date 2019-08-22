@@ -9,7 +9,7 @@ public class SkillController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        runningSkill=new List<Skill>(6);
+        runningSkill=new List<Skill>();
         skillStarter=null;
     }
 
@@ -19,9 +19,8 @@ public class SkillController : MonoBehaviour
         if(skillStarter!=null){
             skillStarter.update();
         }
-        foreach (var skill in runningSkill)
-        {
-            skill.onUpdate();
+        for(int i=runningSkill.Count-1;i>=0;--i){
+            runningSkill[i].onUpdate();
         }
     }
 
@@ -29,29 +28,43 @@ public class SkillController : MonoBehaviour
         if(skillStarter!=null){
             skillStarter.fixedUpdate();
         }
-        foreach (var skill in runningSkill)
-        {
-            skill.onFixedUpdate();
+        for(int i=runningSkill.Count-1;i>=0;--i){
+            runningSkill[i].onFixedUpdate();
         }
     }
 
     public void executeSkill(Skill skill){
         if(skill!=null){
+            skill.skillController=this;
             skill.execute();
             //按照优先级将其加入技能list
-            int i=0;
-            while(runningSkill[i].priority<skill.priority){
-                if(++i>=runningSkill.Count){
-                    break;
-                }
+            if(runningSkill.Count==0){
+                runningSkill.Add(skill);
             }
-            runningSkill.Insert(i,skill);
+            else{
+                int i=runningSkill.Count;
+                while(runningSkill[i-1].priority>=skill.priority){
+                    if(--i==0){
+                        break;
+                    }
+                }
+                runningSkill.Insert(i,skill);
+            }
         }
     }
 
     public void executeStarter(BaseStarter starter){
         if(skillStarter==null){
             skillStarter=starter;
+        }
+    }
+
+    public void endSkill(Skill skill){
+        Debug.Log("end skill called");
+        if(skill!=null&&runningSkill.Contains(skill)){
+            runningSkill.Remove(skill);
+            skill.onEnd();
+            skill.reset();
         }
     }
 

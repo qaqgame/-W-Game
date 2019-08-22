@@ -11,11 +11,10 @@ public class CirclePicker : ObjectPicker
 
     protected override List<string> FilterObject(){
         List<string> objects=new List<string>();
-        Vector3 worldCenter=PositionUtil.RelativeToWorldPosition(center,ParentObject().name);
         foreach (var gameObject in GameObject.FindGameObjectsWithTag(MainObjectTypes.MAIN_OBJECT))
         {
-            Debug.Log("object pos:"+gameObject.transform.position+" center:"+worldCenter);
-            if((gameObject.transform.position-worldCenter).sqrMagnitude<radius*radius){
+            //Debug.Log("object name:"+gameObject.name+"object pos:"+gameObject.transform.position+" center:"+center+" distance:"+(gameObject.transform.position-center).sqrMagnitude+ " radius*2"+radius*radius);
+            if((gameObject.transform.position-center).sqrMagnitude<radius*radius){
                 objects.Add(gameObject.name);
                 Debug.Log("objects picked:"+gameObject.name);
             }

@@ -8,20 +8,24 @@ public interface Condition {
 
 public class ConditionUtil{
     public static bool CheckConditions(Condition[] conditions){
-        foreach (var condition in conditions)
-        {
-            if(!condition.available()){
-                return false;
+        if(conditions!=null){
+            foreach (var condition in conditions)
+            {
+                if(!condition.available()){
+                    return false;
+                }
             }
         }
         return true;
     }
 
     public static bool CheckConditions(List<Condition> conditions){
-        foreach (var condition in conditions)
-        {
-            if(!condition.available()){
-                return false;
+        if(conditions!=null){
+            foreach (var condition in conditions)
+            {
+                if(!condition.available()){
+                    return false;
+                }
             }
         }
         return true;

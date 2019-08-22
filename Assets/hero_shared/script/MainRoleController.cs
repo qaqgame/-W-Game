@@ -6,13 +6,12 @@ public class MainRoleController : MonoBehaviour
 {
     public Camera camera;
     public SkillController skillController;
-    private BaseStarter starter;
-    private ObjectPicker picker;
+
+    Skill skill;
     // Start is called before the first frame update
     void Start()
     {
-        picker=new CirclePicker(1,true,false);
-        starter=new CircleBoundStarter(ref picker,10);
+        skill=new TestSkill();
     }
 
     // Update is called once per frame
@@ -41,7 +40,7 @@ public class MainRoleController : MonoBehaviour
             LockStepController.Instance.SendAction(new Stop(this.transform.name,0));
         }
         if(Input.GetKey(KeyCode.Q)){
-            starter.execute();
+            skill.starter.execute();
         }
     }
 }
