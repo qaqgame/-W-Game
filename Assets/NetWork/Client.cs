@@ -20,7 +20,7 @@ public class Client : MonoBehaviour
     // 帧时间
     public static float frameStep = 0.005f;  // 每0.05s = 50ms 一帧
 
-    public static String userID="glodxy";//用户id，用于send与sendack，作为用户标识（昵称）
+    public static String userID="smili";//用户id，用于send与sendack，作为用户标识（昵称）
 
     // socket 参数
     Socket socket;
