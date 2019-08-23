@@ -107,9 +107,11 @@ public class LockStepController : MonoBehaviour
 		return false;
 	}
 
+	public static float currentime=0f;
+
     private float accumilatedTime = 0f;
 	
-	public float frameLength = 0.05f; //5 miliseconds
+	public static float frameLength = 0.005f; //5 miliseconds
 
 	public int gameFramesPerLocksetpTurn=4;
 
@@ -138,6 +140,7 @@ public class LockStepController : MonoBehaviour
 	}
 
 	private void GameFrameTurn() {
+		currentime+=frameLength;
 		//first frame is used to process actions
 		if(gameFrame == 0) {
 			if(LockStepTurn()) {

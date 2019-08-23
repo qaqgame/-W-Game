@@ -58,7 +58,7 @@ public class BasicRoleControll : MonoBehaviour
 
     public void onFixedUpdate() {  
         if(animator.GetInteger("state")==1){
-            float unitDistance=((float)speed*speedInfluence)*Time.fixedDeltaTime;//单位时间内移动距离
+            float unitDistance=((float)speed*speedInfluence)*LockStepController.frameLength;//单位时间内移动距离
             if (Vector3.Distance(transform.position, endPosition) <= unitDistance)//到达目标地址，自身位置和鼠标点击位置小于0时，近似于停止
             {
                 transform.position=endPosition;

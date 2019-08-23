@@ -26,10 +26,10 @@ public class TimerEvent : SkillEvent{
 
     public override void onFixedUpdate(){
         //间隔时间>=0
-        if(intervalTime>=0&&curTimes<times&&Time.time>eventStartTime+(curTimes+1)*intervalTime){
+        if(intervalTime>=0&&curTimes<times&&LockStepController.currentime>eventStartTime+(curTimes+1)*intervalTime){
             onTimerUpdate();
         }
-        if(Time.time>=eventStartTime+timeLength)
+        if(LockStepController.currentime>=eventStartTime+timeLength)
             onEnd();
     }
 

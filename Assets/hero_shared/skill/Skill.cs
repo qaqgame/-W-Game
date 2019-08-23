@@ -35,7 +35,7 @@ public class Skill : ScriptableObject
     public void execute(){
         runnning=true;
         onStart();
-        startTime=Time.time;
+        startTime=LockStepController.currentime;
     }
     //开始时
     public virtual void onStart(){
@@ -57,7 +57,7 @@ public class Skill : ScriptableObject
         if(events.Count>0){
             int i=0;
             //更新events
-            while(Time.time-startTime>=events[i].startTime){
+            while(LockStepController.currentime-startTime>=events[i].startTime){
                 //如果i位置的event可以执行
                 if(ConditionUtil.CheckConditions(events[i].conditions)){
                     //执行并从events中移除

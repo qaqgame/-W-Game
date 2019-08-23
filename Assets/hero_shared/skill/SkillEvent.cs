@@ -30,7 +30,7 @@ public class SkillEvent : ScriptableObject
         if(picker!=null){
             objects=picker.execute();
         }
-        eventStartTime=Time.time;
+        eventStartTime=LockStepController.currentime;
         if(startActions!=null){
             foreach (var action in startActions)
             {
