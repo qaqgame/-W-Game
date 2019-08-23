@@ -46,6 +46,14 @@ public class Skill : ScriptableObject
     }
     //更新时
     public virtual void onUpdate(){
+        //更新action
+        foreach (var action in continuousActions)
+        {
+            action.update();
+        }
+    }
+    //按时
+    public virtual void onFixedUpdate(){
         if(events.Count>0){
             int i=0;
             //更新events
@@ -63,14 +71,6 @@ public class Skill : ScriptableObject
                 }
             }
         }
-        //更新action
-        foreach (var action in continuousActions)
-        {
-            action.update();
-        }
-    }
-    //按时
-    public virtual void onFixedUpdate(){
         foreach (var e in runningEvent)
         {
             e.onFixedUpdate();

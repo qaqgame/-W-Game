@@ -36,7 +36,7 @@ public class PositionUtil
 
     public static bool isInMainCameraView(Vector3 position){
         Vector3 viewPos=mainCamera.WorldToViewportPoint(position);
-        Debug.Log("view Pos:"+viewPos);
+        //Debug.Log("view Pos:"+viewPos);
         if(viewPos.z>0&&viewPos.x>=0&&viewPos.x<=1&&viewPos.y>=0&&viewPos.y<=1){
             return true;
         }

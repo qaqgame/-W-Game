@@ -145,10 +145,21 @@ public class LockStepController : MonoBehaviour
 			}
 		} else {
 			ProcessActions(gameFrame);
+			updateMainGameObject();
 			gameFrame++;
 			if(gameFrame > gameFramesPerLocksetpTurn) {
 				gameFrame = 0;
 			}
+		}
+	}
+
+
+	private void updateMainGameObject(){
+		GameObject[] objs=GameObject.FindGameObjectsWithTag(MainObjectTypes.MAIN_OBJECT);
+		foreach (var obj in objs)
+		{
+			obj.GetComponent<BasicRoleControll>().onFixedUpdate();
+			obj.GetComponent<SkillController>().onFixedUpdate();
 		}
 	}
     #endregion

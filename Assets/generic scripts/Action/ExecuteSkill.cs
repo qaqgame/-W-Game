@@ -12,6 +12,8 @@ public class ExecuteSkill : IAction
     }
 
     public override void Execute(){
+        Debug.LogWarning("obj skill:"+objectName);
+        Debug.LogWarning(objectName+","+frameNum+","+position);
         Skill skill=SkillManager.getInstance().getSkill(skillID);
         skill.skillController=GameObject.Find(objectName).GetComponent<SkillController>();
         skill.starter.picker.setPosition(position);

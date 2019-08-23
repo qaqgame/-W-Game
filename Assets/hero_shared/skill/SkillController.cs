@@ -24,7 +24,7 @@ public class SkillController : MonoBehaviour
         }
     }
 
-    void FixedUpdate() {
+    public void onFixedUpdate() {
         if(skillStarter!=null){
             skillStarter.fixedUpdate();
         }

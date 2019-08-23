@@ -13,7 +13,7 @@ public class FollowUI : MonoBehaviour
             foreach (var ui in uis)
             {
                 ui.gameObject.SetActive(true);
-                Debug.Log("ui:"+ui.rectTransform);
+                //Debug.Log("ui:"+ui.rectTransform);
                 ui.rectTransform.position=player2DPosition+new Vector2(ui.offsetx,ui.offsety);
             }
         }

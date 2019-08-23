@@ -17,7 +17,7 @@ public class Damage : Action
         foreach (var name in objs)
         {
             GameObject.Find(name).GetComponent<BasicAttrController>().hP.cur-=50;
-            Debug.Log("damage "+name+" "+damage);
+            Debug.LogWarning("damage "+name+" "+damage);
         }
     }
 }

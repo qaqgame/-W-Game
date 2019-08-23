@@ -448,7 +448,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   serverIp: 120.79.240.163
   serverPort: 8080
-  singleModel: 1
+  singleModel: 0
 --- !u!114 &282840818
 MonoBehaviour:
   m_ObjectHideFlags: 0

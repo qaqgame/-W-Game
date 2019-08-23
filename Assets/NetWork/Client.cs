@@ -20,7 +20,7 @@ public class Client : MonoBehaviour
     // 帧时间
     public static float frameStep = 0.005f;  // 每0.05s = 50ms 一帧
 
-    public static String userID="smili";//用户id，用于send与sendack，作为用户标识（昵称）
+    public static String userID="glodxy";//用户id，用于send与sendack，作为用户标识（昵称）
 
     // socket 参数
     Socket socket;
@@ -302,9 +302,13 @@ public class Client : MonoBehaviour
                         if(title.datatype == 1){
                             ////Debug.Log("调用 RecieveActions 接口");
                             Response all = res.ToObject<Response>();
+                            if(all.result=="timeout"){
+                                Debug.LogError("timeout:"+getstr);
+                            }
                             if(all.content != null){
                                 foreach(var resgame in all.content){
-                                    if(resgame.Opinions != null){
+                                    if(resgame.Opinions.Count != 0){
+                                        Debug.Log("检测数据:"+getstr);
                                         LockStepController.Instance.RecieveActions(all.Roundnum, resgame.UserID, resgame.Opinions.ToArray()); 
                                     }
                                 }  
