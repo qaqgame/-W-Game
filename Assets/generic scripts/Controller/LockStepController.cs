@@ -140,13 +140,16 @@ public class LockStepController : MonoBehaviour
 	}
 
 	private void GameFrameTurn() {
-		currentime+=frameLength;
 		//first frame is used to process actions
 		if(gameFrame == 0) {
 			if(LockStepTurn()) {
+				currentime+=frameLength;
+				ProcessActions(gameFrame);
+				updateMainGameObject();
 				gameFrame++;
 			}
 		} else {
+			currentime+=frameLength;
 			ProcessActions(gameFrame);
 			updateMainGameObject();
 			gameFrame++;
