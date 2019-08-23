@@ -432,7 +432,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LockStepTurnID: 0
   running: 0
-  frameLength: 0.005
   gameFramesPerLocksetpTurn: 4
 --- !u!114 &282840817
 MonoBehaviour:
@@ -448,7 +447,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   serverIp: 120.79.240.163
   serverPort: 8080
-  singleModel: 0
+  singleModel: 1
 --- !u!114 &282840818
 MonoBehaviour:
   m_ObjectHideFlags: 0
