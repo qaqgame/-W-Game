@@ -33,4 +33,13 @@ public class PositionUtil
         string[] result=s.Split(',');
         return new Vector3(float.Parse(result[0]),float.Parse(result[1]),float.Parse(result[2]));
     }
+
+    public static bool isInMainCameraView(Vector3 position){
+        Vector3 viewPos=mainCamera.WorldToViewportPoint(position);
+        Debug.Log("view Pos:"+viewPos);
+        if(viewPos.z>0&&viewPos.x>=0&&viewPos.x<=1&&viewPos.y>=0&&viewPos.y<=1){
+            return true;
+        }
+        return false;
+    }
 }
