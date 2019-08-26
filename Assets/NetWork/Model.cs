@@ -57,6 +57,20 @@ namespace NetModels
         public string result;
         public int Roundnum;
     }
+
+    // 位置
+    public class Pos{
+        public string UserId;
+        public string Position;
+    }
+
+    // 状态同步
+    public class Status{
+        public int datatype;
+        public string result;
+        public int Roundnum;
+        public Queue<Pos> AllStatus; 
+    }
     
 
 }

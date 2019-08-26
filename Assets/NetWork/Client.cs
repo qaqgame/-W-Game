@@ -20,7 +20,7 @@ public class Client : MonoBehaviour
     // 帧时间
     public static float frameStep = 0.005f;  // 每0.05s = 50ms 一帧
 
-    public static String userID="glodxy";//用户id，用于send与sendack，作为用户标识（昵称）
+    public static String userID="smili";//用户id，用于send与sendack，作为用户标识（昵称）
 
     // socket 参数
     Socket socket;
@@ -38,6 +38,8 @@ public class Client : MonoBehaviour
     // 标志
     private bool threadstop = false;
     private bool isGaming = false;
+    private bool reconn = false;
+    private bool synchronizing = false;
 
     // 计时器
     private System.Threading.Timer timer_heartbeats; //1000ms = 1s;
@@ -109,23 +111,37 @@ public class Client : MonoBehaviour
         if(socket.Connected){
             Debug.Log("Connected success");
 
-            // 发送心跳包
-            timer_heartbeats = new System.Threading.Timer(SendHeartBeats, null, 0, 5);
-            
-            // 启动接收信息线程
-            this.threadRecv = new Thread(new ThreadStart(ReceiveFromServer));
-            this.threadRecv.IsBackground = true;
-            this.threadRecv.Start();
+            if(!reconn){                
+                // 发送心跳包
+                timer_heartbeats = new System.Threading.Timer(SendHeartBeats, null, 0, 5);
+                
+                // 启动接收信息线程
+                this.threadRecv = new Thread(new ThreadStart(ReceiveFromServer));
+                this.threadRecv.IsBackground = true;
+                this.threadRecv.Start();
 
-            // 启动分解信息线程
-            this.threadSeparation = new Thread(new ThreadStart(Separation));
-            this.threadSeparation.IsBackground = true;
-            this.threadSeparation.Start();
+                // 启动分解信息线程
+                this.threadSeparation = new Thread(new ThreadStart(Separation));
+                this.threadSeparation.IsBackground = true;
+                this.threadSeparation.Start();
 
-            // 启动解析信息线程
-            this.threadParase = new Thread(new ThreadStart(Parase));
-            this.threadParase.IsBackground = true;
-            this.threadParase.Start();
+                // 启动解析信息线程
+                this.threadParase = new Thread(new ThreadStart(Parase));
+                this.threadParase.IsBackground = true;
+                this.threadParase.Start();
+            }else{
+                Debug.Log("正在进行重连后同步数据");
+                this.synchronizing = true;
+                AckTitle re = new AckTitle();
+                re.datatype = 5;
+                re.UserID = userID;
+                // 找tcy要接口
+                re.Roundnum = LockStepController.Instance.LockStepTurnID;
+                string str = JsonConvert.SerializeObject(re);
+                byte[] buffer = SocketSend.StringtoByte(str);
+                this.socket.BeginSend(buffer, 0, buffer.Length, 0,new AsyncCallback(SendCallback), this.socket);
+
+            }
             
         }
         else{
@@ -134,6 +150,10 @@ public class Client : MonoBehaviour
             socket.EndConnect(ar);
         }
 
+    }
+
+    private void Reconneted(){
+        Connect();
     }
     
 
@@ -186,6 +206,9 @@ public class Client : MonoBehaviour
             }
             catch(SocketException ex){
                 Debug.Log("Failed when write to buffer"+DateTime.Now.TimeOfDay.ToString());
+                Debug.Log("The connetion is breakout, stop sending GamingInfo");
+                this.timer_gaming.Change(-1,0);
+                Reconneted();
             }
         }
     }
@@ -299,7 +322,7 @@ public class Client : MonoBehaviour
                         JObject res = JObject.Parse(getstr);
                         ResTitle title = res.ToObject<ResTitle>();
                         //Debug.Log("接收到的response的类型："+title.datatype);
-                        if(title.datatype == 1){
+                        if(title.datatype == 1 && !synchronizing || title.datatype == 8){
                             ////Debug.Log("调用 RecieveActions 接口");
                             Response all = res.ToObject<Response>();
                             if(all.result=="timeout"){
@@ -317,13 +340,42 @@ public class Client : MonoBehaviour
                             LockStepController.Instance.ConfirmTurn(title.Roundnum);
                             //Debug.Log("调用 ConfirmTrun 接口，传入回合："+title.Roundnum);
                             // this.SendAck(all.Roundnum);
-                            
+                            if(title.datatype == 8){
+                                Status st = new Status();
+                                st.datatype = 6;
+                                st.result = "success";
+                                st.Roundnum = LockStepController.Instance.LockStepTurnID;
+                                st.AllStatus = new Queue<Pos>();
+                                // tcy取得Pos
+                                Pos po = new Pos();
+                                po.UserId = userID;
+                                po.Position = "111*111";
+                                // 上面是假数据
+                                st.AllStatus.Enqueue(po);
+
+                                string str = JsonConvert.SerializeObject(st);
+                                byte[] buffer = SocketSend.StringtoByte(str);
+                                this.socket.BeginSend(buffer, 0, buffer.Length, 0,new AsyncCallback(SendCallback), this.socket);
+
+                            }
                                                       
-                            
+                        }
+                        else if(title.datatype == 1 && synchronizing){
+                            lock(waitList){
+                                waitList.Enqueue(getstr);
+                            }
+                        }
+                        else if(title.datatype == 7){
+                            Debug.Log("datatype 7 数据："+getstr);
+                            Status all = res.ToObject<Status>();
+                            Debug.Log("收到type7，重启发送GamingInfo");
+                            this.timer_gaming.Change(0,20);
+
+                        }
                         // }else if(title.datatype == 4){
                         //     // Debug.Log("调用 ConfirmTrun 接口，传入回合："+title.Roundnum);
                         //     LockStepController.Instance.ConfirmTurn(title.Roundnum);
-                        }else{
+                        else{
                             Debug.Log("接收到未知类型的reponse");
                         }
                     }                        
