@@ -287,6 +287,7 @@ public class Client : MonoBehaviour
 
     }
 
+    private int reStep = -1;
 
     private int timepara = 0;
     private int timeparacount = 0;
@@ -322,45 +323,48 @@ public class Client : MonoBehaviour
                         JObject res = JObject.Parse(getstr);
                         ResTitle title = res.ToObject<ResTitle>();
                         //Debug.Log("接收到的response的类型："+title.datatype);
-                        if(title.datatype == 1 && !synchronizing || title.datatype == 8){
+                        if(title.datatype == 1 && !synchronizing || title.datatype == 8 && !synchronizing){
                             ////Debug.Log("调用 RecieveActions 接口");
-                            Response all = res.ToObject<Response>();
-                            if(all.result=="timeout"){
-                                Debug.LogError("timeout:"+getstr);
-                            }
-                            if(all.content != null){
-                                foreach(var resgame in all.content){
-                                    if(resgame.Opinions.Count != 0){
-                                        Debug.Log("检测数据:"+getstr);
-                                        LockStepController.Instance.RecieveActions(all.Roundnum, resgame.UserID, resgame.Opinions.ToArray()); 
-                                    }
-                                }  
-                            }
+                            if(this.reStep < title.Roundnum){
+                                Response all = res.ToObject<Response>();
+                                if(all.result=="timeout"){
+                                    Debug.LogError("timeout:"+getstr);
+                                }
+                                if(all.content != null){
+                                    foreach(var resgame in all.content){
+                                        if(resgame.Opinions.Count != 0){
+                                            Debug.Log("检测数据:"+getstr);
+                                            LockStepController.Instance.RecieveActions(all.Roundnum, resgame.UserID, resgame.Opinions.ToArray()); 
+                                        }
+                                    }  
+                                }
 
-                            LockStepController.Instance.ConfirmTurn(title.Roundnum);
-                            //Debug.Log("调用 ConfirmTrun 接口，传入回合："+title.Roundnum);
-                            // this.SendAck(all.Roundnum);
-                            if(title.datatype == 8){
-                                Status st = new Status();
-                                st.datatype = 6;
-                                st.result = "success";
-                                st.Roundnum = LockStepController.Instance.LockStepTurnID;
-                                st.AllStatus = new Queue<Pos>();
-                                // tcy取得Pos
-                                Pos po = new Pos();
-                                po.UserId = userID;
-                                po.Position = "111*111";
-                                // 上面是假数据
-                                st.AllStatus.Enqueue(po);
+                                LockStepController.Instance.ConfirmTurn(title.Roundnum);
+                                //Debug.Log("调用 ConfirmTrun 接口，传入回合："+title.Roundnum);
+                                // this.SendAck(all.Roundnum);
+                                if(title.datatype == 8){
+                                    Status st = new Status();
+                                    st.datatype = 6;
+                                    st.result = "success";
+                                    st.Roundnum = LockStepController.Instance.LockStepTurnID;
+                                    st.AllStatus = new Queue<Pos>();
+                                    // tcy取得Pos
+                                    Pos po = new Pos();
+                                    po.UserId = userID;
+                                    po.Position = "111*111";
+                                    // 上面是假数据
+                                    st.AllStatus.Enqueue(po);
 
-                                string str = JsonConvert.SerializeObject(st);
-                                byte[] buffer = SocketSend.StringtoByte(str);
-                                this.socket.BeginSend(buffer, 0, buffer.Length, 0,new AsyncCallback(SendCallback), this.socket);
+                                    string str = JsonConvert.SerializeObject(st);
+                                    byte[] buffer = SocketSend.StringtoByte(str);
+                                    this.socket.BeginSend(buffer, 0, buffer.Length, 0,new AsyncCallback(SendCallback), this.socket);
 
+                                }
                             }
+                            
                                                       
                         }
-                        else if(title.datatype == 1 && synchronizing){
+                        else if(title.datatype == 1 && synchronizing || title.datatype == 8 && synchronizing){
                             lock(waitList){
                                 waitList.Enqueue(getstr);
                             }

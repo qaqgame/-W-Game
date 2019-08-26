@@ -42,13 +42,15 @@ namespace NetUtils
         // 创建参数列表 每个参数要求超过5字符！！（用于分解接收的原始 string）
         public static string[] getParameter(){
             string para_1 = "{\"datatype\":1";
-            string para_2 = "{\"datatype\":4";
-            string para_3 = "GameStart";
+            string para_2 = "{\"datatype\":7";
+            string para_3 = "{\"datatype\":8";
+            string para_4 = "GameStart";
             // string para_2 = "";
-            string[] paraList = new string[3];
+            string[] paraList = new string[4];
             paraList[0] = para_1;
             paraList[1] = para_2;
             paraList[2] = para_3;
+            paraList[3] = para_4;
             return paraList;
         }
 
