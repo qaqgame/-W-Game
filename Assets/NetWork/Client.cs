@@ -206,9 +206,9 @@ public class Client : MonoBehaviour
             }
             catch(SocketException ex){
                 Debug.Log("Failed when write to buffer"+DateTime.Now.TimeOfDay.ToString());
-                Debug.Log("The connetion is breakout, stop sending GamingInfo");
-                this.timer_gaming.Change(-1,0);
-                Reconneted();
+                // Debug.Log("The connetion is breakout, stop sending GamingInfo");
+                // this.timer_gaming.Change(-1,0);
+                // Reconneted();
             }
         }
     }
@@ -527,6 +527,14 @@ public class Client : MonoBehaviour
             // 计算用时
             Debug.Log("timerecv:"+(this.timerecv/this.timerecvcount)+"timesepa:"+(this.timesepa/this.timesepacount)+"timepara:"+(this.timepara/this.timeparacount)+"timesendinfo:"+(this.timesendinfo/this.timesendinfocount)+"timesend:"+(this.timesend/this.timesendcount));
 
+        }
+        if(Input.GetKey(KeyCode.K)){
+            Debug.Log("The connetion is breakout, stop sending GamingInfo");
+            this.timer_gaming.Change(-1,0);
+        }
+        if(Input.GetKey(KeyCode.R)){
+            
+            Reconneted();
         }
         if(running){
             // Debug.Log("is running");
