@@ -20,6 +20,9 @@ public class LockStepController : MonoBehaviour
     //用于确认的action
 	private ConfirmActions confirmActions;
 
+	protected int stateTurn;
+	protected Queue<Pos> curState;//上回合的全部状态
+
     //网络层
     Client client;
 
@@ -45,7 +48,7 @@ public class LockStepController : MonoBehaviour
         LockStepTurnID = FirstLockStepTurnID;
         pendingActions = new PendingActions();
 		confirmActions = new ConfirmActions();
-
+		curState=new Queue<Pos>();
         InitGame();
     }
 
@@ -158,7 +161,8 @@ public class LockStepController : MonoBehaviour
 			updateMainGameObject();
 			gameFrame++;
 			if(gameFrame > gameFramesPerLocksetpTurn) {
-				updating=false;
+				curState=CurrentState();
+				stateTurn=LockStepTurnID;
 				gameFrame = 0;
 			}
 		}
@@ -176,9 +180,7 @@ public class LockStepController : MonoBehaviour
     #endregion
 
 	#region GetData
-	public Queue<Pos> getCurStateInfo(){
-		while(updating);
-		readingData=true;
+	protected Queue<Pos> CurrentState(){
 		GameObject[] objs=GameObject.FindGameObjectsWithTag(MainObjectTypes.MAIN_OBJECT);
 		Queue<Pos> states=new Queue<Pos>();
 		foreach (var obj in objs)
@@ -188,8 +190,14 @@ public class LockStepController : MonoBehaviour
 			pos.Position=obj.transform.position.ToString();
 			states.Enqueue(pos);
 		}
-		readingData=false;
 		return states;
+	}
+	public Queue<Pos> getCurStateInfo(){
+		return curState;
+	}
+
+	public int getCurStateTurn(){
+		return stateTurn;
 	}
 
 	public void setCurStateInfo(Queue<Pos> position){
@@ -198,6 +206,7 @@ public class LockStepController : MonoBehaviour
 			Vector3 p=PositionUtil.StringToVector3(pos.Position);
 			GameObject.Find(pos.UserId).transform.position=p;
 		}
+		curState=position;
 	}
 	#endregion
 }

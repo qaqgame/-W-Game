@@ -20,7 +20,7 @@ public class Client : MonoBehaviour
     // 帧时间
     public static float frameStep = 0.005f;  // 每0.05s = 50ms 一帧
 
-    public static String userID="smili";//用户id，用于send与sendack，作为用户标识（昵称）
+    public static String userID="glodxy";//用户id，用于send与sendack，作为用户标识（昵称）
 
     // socket 参数
     Socket socket;
@@ -323,7 +323,7 @@ public class Client : MonoBehaviour
                         JObject res = JObject.Parse(getstr);
                         ResTitle title = res.ToObject<ResTitle>();
                         //Debug.Log("接收到的response的类型："+title.datatype);
-                        if(title.datatype == 1 && !synchronizing || title.datatype == 8 && !synchronizing){
+                        if((title.datatype == 1 && !synchronizing)||(title.datatype == 8 && !synchronizing)){
                             ////Debug.Log("调用 RecieveActions 接口");
                             if(this.reStep < title.Roundnum){
                                 Response all = res.ToObject<Response>();
@@ -349,20 +349,21 @@ public class Client : MonoBehaviour
                                     st.Roundnum = LockStepController.Instance.LockStepTurnID;
                                     st.AllStatus = new Queue<Pos>();
                                     // tcy取得Pos
-                                    
+                                    Debug.Log("收到type 8");
+
                                     // 上面是假数据
                                     st.AllStatus = LockStepController.Instance.getCurStateInfo();
 
                                     string str = JsonConvert.SerializeObject(st);
                                     byte[] buffer = SocketSend.StringtoByte(str);
                                     this.socket.BeginSend(buffer, 0, buffer.Length, 0,new AsyncCallback(SendCallback), this.socket);
-
+                                    Debug.Log("发送type 6："+str);
                                 }
                             }
                             
                                                       
                         }
-                        else if(title.datatype == 1 && synchronizing || title.datatype == 8 && synchronizing){
+                        else if((title.datatype == 1 && synchronizing)||(title.datatype == 8 && synchronizing)){
                             lock(waitList){
                                 waitList.Enqueue(getstr);
                             }
@@ -531,9 +532,10 @@ public class Client : MonoBehaviour
         if(Input.GetKey(KeyCode.K)){
             Debug.Log("The connetion is breakout, stop sending GamingInfo");
             this.timer_gaming.Change(-1,0);
+            this.socket.Close();
         }
-        if(Input.GetKey(KeyCode.R)){
-            
+        if(Input.GetKey(KeyCode.R)&&!this.reconn){
+            this.reconn = true;
             Reconneted();
         }
         if(running){
