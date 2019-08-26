@@ -11,6 +11,9 @@ public class LockStepController : MonoBehaviour
 	public static LockStepController Instance;
 	
 	public int LockStepTurnID = FirstLockStepTurnID;
+
+	public bool updating=true;//在回合中
+	public bool readingData=false;//在阅读当前回合的数据
 	
     //用于执行的action
 	private PendingActions pendingActions;
@@ -94,7 +97,8 @@ public class LockStepController : MonoBehaviour
 
     private bool NextTurn() {
 		//Debug.Log("tcy当前动作数："+pendingActions.currentActionsCount+"  当前回合："+LockStepTurnID);
-		if(confirmActions.ReadyForNextTurn() && pendingActions.ReadyForNextTurn()) {
+		if(confirmActions.ReadyForNextTurn() && pendingActions.ReadyForNextTurn()&&!readingData) {
+			updating=true;//表示正在进行回合
 			//增加回合数
 			LockStepTurnID++;
 			//将确认用action移至下一回合
@@ -143,9 +147,9 @@ public class LockStepController : MonoBehaviour
 		//first frame is used to process actions
 		if(gameFrame == 0) {
 			if(LockStepTurn()) {
-				currentime+=frameLength;
-				ProcessActions(gameFrame);
-				updateMainGameObject();
+				// currentime+=frameLength;
+				// ProcessActions(gameFrame);
+				// updateMainGameObject();
 				gameFrame++;
 			}
 		} else {
@@ -154,6 +158,7 @@ public class LockStepController : MonoBehaviour
 			updateMainGameObject();
 			gameFrame++;
 			if(gameFrame > gameFramesPerLocksetpTurn) {
+				updating=false;
 				gameFrame = 0;
 			}
 		}
@@ -169,4 +174,30 @@ public class LockStepController : MonoBehaviour
 		}
 	}
     #endregion
+
+	#region GetData
+	public Queue<Pos> getCurStateInfo(){
+		while(updating);
+		readingData=true;
+		GameObject[] objs=GameObject.FindGameObjectsWithTag(MainObjectTypes.MAIN_OBJECT);
+		Queue<Pos> states=new Queue<Pos>();
+		foreach (var obj in objs)
+		{
+			Pos pos=new Pos();
+			pos.UserId=obj.name;
+			pos.Position=obj.transform.position.ToString();
+			states.Enqueue(pos);
+		}
+		readingData=false;
+		return states;
+	}
+
+	public void setCurStateInfo(Queue<Pos> position){
+		foreach (var pos in position)
+		{
+			Vector3 p=PositionUtil.StringToVector3(pos.Position);
+			GameObject.Find(pos.UserId).transform.position=p;
+		}
+	}
+	#endregion
 }
