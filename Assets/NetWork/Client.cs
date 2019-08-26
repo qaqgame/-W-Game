@@ -349,11 +349,9 @@ public class Client : MonoBehaviour
                                     st.Roundnum = LockStepController.Instance.LockStepTurnID;
                                     st.AllStatus = new Queue<Pos>();
                                     // tcy取得Pos
-                                    Pos po = new Pos();
-                                    po.UserId = userID;
-                                    po.Position = "111*111";
+                                    
                                     // 上面是假数据
-                                    st.AllStatus.Enqueue(po);
+                                    st.AllStatus = LockStepController.Instance.getCurStateInfo();
 
                                     string str = JsonConvert.SerializeObject(st);
                                     byte[] buffer = SocketSend.StringtoByte(str);
@@ -372,6 +370,8 @@ public class Client : MonoBehaviour
                         else if(title.datatype == 7){
                             Debug.Log("datatype 7 数据："+getstr);
                             Status all = res.ToObject<Status>();
+                            LockStepController.Instance.setCurStateInfo(all.AllStatus);
+
                             Debug.Log("收到type7，重启发送GamingInfo");
                             this.timer_gaming.Change(0,20);
 
