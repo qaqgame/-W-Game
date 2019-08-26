@@ -447,7 +447,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   serverIp: 120.79.240.163
   serverPort: 8080
-  singleModel: 1
+  singleModel: 0
 --- !u!114 &282840818
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -557,7 +557,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 400
-  speedInfluence: 0.01
+  speedInfluence: 0.05
   realObject: {fileID: 2058197554987352902}
 --- !u!4 &493935579
 Transform:
@@ -2320,7 +2320,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 400
-  speedInfluence: 0.01
+  speedInfluence: 0.05
   realObject: {fileID: 1246453888}
 --- !u!4 &2040386223
 Transform:
@@ -2423,7 +2423,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 400
-  speedInfluence: 0.01
+  speedInfluence: 0.05
   realObject: {fileID: 27947638551921622}
 --- !u!4 &2067868048
 Transform:

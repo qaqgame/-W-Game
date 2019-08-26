@@ -1,0 +1,36 @@
+﻿$代表存储变量,%表示内置变量,@表示外部,#为注释
+' '将按字符串解析
+Skill:{
+    starter:
+    onStart:{}
+    onEnd:{}
+    onInterrupt:{}
+    onUpdate:{
+        SkillEvent():{
+            startTime:0
+            picker:null
+            conditions:null
+            onStart:{
+                Store('test',String('test'))
+            }
+        }
+        SkillEvent():{
+            startTime:2
+            picker:
+            conditions:$test=='great'
+            onStart:{}
+        }
+        TimerEvent():{
+            startTime:
+            intervalTime:
+            timeLength:
+            times:
+            onStart:{}
+            onTimer:{}
+            onEnd:{
+                FinishSkill(%this)
+            }
+            onInterrupt:{}
+        }
+    }
+}

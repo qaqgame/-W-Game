@@ -17,6 +17,8 @@ public class Skill : ScriptableObject
     public List<SkillEvent> events;//中间的事件
     public List<Action> continuousActions;//持续作用的action
 
+    public GenericDictionary data;
+
     protected List<SkillEvent> usedEvent;
 
     public SkillController skillController=null;

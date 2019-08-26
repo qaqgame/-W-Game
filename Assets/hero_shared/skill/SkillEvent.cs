@@ -7,7 +7,7 @@ using UnityEngine;
 public class SkillEvent : ScriptableObject
 {
     public ObjectPicker picker;
-    public List<Condition> conditions=null;//该事件的条件
+    public List<Conditions> conditions=null;//该事件的条件
     public List<string> objects;//目标对象的name
     public float startTime;//开始时间
     public List<Action> startActions;//开始事件
