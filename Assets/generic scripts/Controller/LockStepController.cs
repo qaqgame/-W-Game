@@ -14,6 +14,7 @@ public class LockStepController : MonoBehaviour
 
 	public bool updating=true;//在回合中
 	public bool readingData=false;//在阅读当前回合的数据
+	public bool reconn=false;
 	
     //用于执行的action
 	private PendingActions pendingActions;
@@ -170,6 +171,14 @@ public class LockStepController : MonoBehaviour
 
 
 	private void updateMainGameObject(){
+		if(reconn){
+			foreach (var pos in curState)
+			{
+				Vector3 p=PositionUtil.StringToVector3(pos.Position);
+				GameObject.Find(pos.UserId).transform.position=p;
+			}
+			reconn=false;
+		}
 		GameObject[] objs=GameObject.FindGameObjectsWithTag(MainObjectTypes.MAIN_OBJECT);
 		foreach (var obj in objs)
 		{
@@ -201,12 +210,15 @@ public class LockStepController : MonoBehaviour
 	}
 
 	public void setCurStateInfo(Queue<Pos> position){
-		foreach (var pos in position)
-		{
-			Vector3 p=PositionUtil.StringToVector3(pos.Position);
-			GameObject.Find(pos.UserId).transform.position=p;
-		}
 		curState=position;
+		reconn=true;
+	}
+
+	public void setCurTurn(int turn){
+		LockStepTurnID=turn;
+		pendingActions.setCurTurn(turn);
+		confirmActions.setCurTurn(turn);
+		gameFrame=0;
 	}
 	#endregion
 }

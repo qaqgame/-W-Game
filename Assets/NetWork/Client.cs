@@ -125,6 +125,7 @@ public class Client : MonoBehaviour
                 this.threadSeparation.IsBackground = true;
                 this.threadSeparation.Start();
 
+
                 // 启动解析信息线程
                 this.threadParase = new Thread(new ThreadStart(Parase));
                 this.threadParase.IsBackground = true;
@@ -140,7 +141,9 @@ public class Client : MonoBehaviour
                 string str = JsonConvert.SerializeObject(re);
                 byte[] buffer = SocketSend.StringtoByte(str);
                 this.socket.BeginSend(buffer, 0, buffer.Length, 0,new AsyncCallback(SendCallback), this.socket);
-
+                this.threadRecv = new Thread(new ThreadStart(ReceiveFromServer));
+                this.threadRecv.IsBackground = true;
+                this.threadRecv.Start();
             }
             
         }
@@ -372,6 +375,8 @@ public class Client : MonoBehaviour
                             Debug.Log("datatype 7 数据："+getstr);
                             Status all = res.ToObject<Status>();
                             LockStepController.Instance.setCurStateInfo(all.AllStatus);
+                            LockStepController.Instance.setCurTurn(all.Roundnum);
+                            this.GameTurn=all.Roundnum+2;
 
                             Debug.Log("收到type7，重启发送GamingInfo");
                             this.timer_gaming.Change(0,20);

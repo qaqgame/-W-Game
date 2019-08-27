@@ -21,9 +21,18 @@ public class ConfirmActions
     }
 
     public void NextTurn(){
+        confirmFlag.Remove(LockStepController.Instance.LockStepTurnID-1);
+    }
 
-        confirmFlag.Remove(LockStepController.Instance.LockStepTurnID -1);   
-        
+    public void setCurTurn(int turn){
+        int[] keys=new int[confirmFlag.Keys.Count];
+        confirmFlag.Keys.CopyTo(keys,0);
+        foreach (var k in keys)
+        {
+            if(k<=LockStepController.Instance.LockStepTurnID){
+                confirmFlag.Remove(k); 
+            }
+        }
     }
     
     public bool ReadyForNextTurn(){

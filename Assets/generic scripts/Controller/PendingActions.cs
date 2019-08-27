@@ -18,11 +18,25 @@ public class PendingActions
 	}
 	
 	public void NextTurn() {
+		
 		if(idleActions.ContainsKey(currentTurn)){
 			idleActions[currentTurn].Clear();
 			idleActions.Remove(currentTurn);
 		}
 		currentTurn++;
+	}
+
+	public void setCurTurn(int turn){
+		currentTurn=turn;
+		int [] keys=new int[idleActions.Keys.Count];
+		idleActions.Keys.CopyTo(keys,0);
+		foreach (var k in keys)
+		{
+			if(k<=currentTurn){
+				idleActions[k].Clear();
+				idleActions.Remove(k);
+			}
+		}
 	}
 	
 	public void Porcess(int frame){
